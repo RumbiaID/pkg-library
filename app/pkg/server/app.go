@@ -1,5 +1,20 @@
 package server
 
+type Config struct {
+	HttpPort string `validate:"required,number" name:"HTTP_PORT"`
+}
+
+type App interface {
+	Run(appconf *Config) error
+}
+
+type LogMessage struct {
+	CompanyID  int64
+	EmployeeID int64
+	Email      string
+	Log        string
+}
+
 const (
 	DefaultResponseType = iota // For API
 	StreamResponseType         // For Excel
@@ -16,6 +31,7 @@ type Response struct {
 	Data         interface{} `json:"data"`
 	RequestID    string      `json:"request_id"`
 	StackTrace   string      `json:"-"`
+	Log          *LogMessage `json:"-"`
 	ResponseType int         `json:"-"`
 }
 
