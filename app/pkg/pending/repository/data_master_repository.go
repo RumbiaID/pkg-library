@@ -6,7 +6,7 @@ import (
 	"pkg-library/app/pkg/pending/domain"
 )
 
-type DataMasterRepository interface {
+type PendingRepository interface {
 	//Pending
 	CreatePending(ctx context.Context, tx *gorm.DB, model *domain.Pending) error
 	UpdatePending(ctx context.Context, tx *gorm.DB, model *domain.Pending) error

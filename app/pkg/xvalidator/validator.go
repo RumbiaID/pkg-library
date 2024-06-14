@@ -2,6 +2,7 @@ package xvalidator
 
 import (
 	"fmt"
+	"github.com/go-playground/validator/v10"
 	"log/slog"
 	"reflect"
 	"strings"

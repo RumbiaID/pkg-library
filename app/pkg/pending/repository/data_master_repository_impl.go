@@ -3,19 +3,18 @@ package repository
 import (
 	"context"
 	"gorm.io/gorm"
-	"pkg-library/app/pkg/getfilter"
 	"pkg-library/app/pkg/pending/domain"
 )
 
-type DataMasterRepositoryImpl struct {
+type PendingRepositoryImpl struct {
 	db *gorm.DB
 }
 
-func NewDataMasterRepositoryImpl(db *gorm.DB) DataMasterRepository {
-	return &DataMasterRepositoryImpl{db: db}
+func NewPendingRepository(db *gorm.DB) PendingRepository {
+	return &PendingRepositoryImpl{db: db}
 }
 
-func (r *DataMasterRepositoryImpl) CreatePending(ctx context.Context, tx *gorm.DB, model *domain.Pending) error {
+func (r *PendingRepositoryImpl) CreatePending(ctx context.Context, tx *gorm.DB, model *domain.Pending) error {
 
 	query := tx.WithContext(ctx).Model(&domain.Pending{})
 	if err := query.Create(&model).
@@ -26,7 +25,7 @@ func (r *DataMasterRepositoryImpl) CreatePending(ctx context.Context, tx *gorm.D
 	return nil
 }
 
-func (r *DataMasterRepositoryImpl) UpdatePending(ctx context.Context, tx *gorm.DB, model *domain.Pending) error {
+func (r *PendingRepositoryImpl) UpdatePending(ctx context.Context, tx *gorm.DB, model *domain.Pending) error {
 	query := tx.WithContext(ctx)
 	if err := query.
 		Model(&domain.Pending{ID: model.ID}).
@@ -38,7 +37,7 @@ func (r *DataMasterRepositoryImpl) UpdatePending(ctx context.Context, tx *gorm.D
 	return nil
 }
 
-func (r *DataMasterRepositoryImpl) DeletePending(ctx context.Context, tx *gorm.DB, id int) error {
+func (r *PendingRepositoryImpl) DeletePending(ctx context.Context, tx *gorm.DB, id int) error {
 	query := tx.WithContext(ctx)
 
 	if err := query.
@@ -48,7 +47,7 @@ func (r *DataMasterRepositoryImpl) DeletePending(ctx context.Context, tx *gorm.D
 	return nil
 }
 
-func (r *DataMasterRepositoryImpl) GetPending(
+func (r *PendingRepositoryImpl) GetPending(
 	ctx context.Context, tx *gorm.DB, tenantcode, tablename string,
 ) (*[]domain.Pending, error) {
 	var models *[]domain.Pending
@@ -60,36 +59,4 @@ func (r *DataMasterRepositoryImpl) GetPending(
 		return nil, err
 	}
 	return models, nil
-}
-
-func (r *DataMasterRepositoryImpl) queryGoals(
-	tx *gorm.DB, arrQuery []getfilter.FilterItem, arrSort []getfilter.FilterSort,
-) *gorm.DB {
-	for _, filter := range arrQuery {
-		keyList := getfilter.GenerateWhere(filter)
-		switch filter.Field {
-		case "id", "goal_type", "is_approve", "hex_color", "created_at", "created_by", "created_nik", "updated_at", "updated_nik", "pending_id", "sys_row_status", "tenant_code":
-			if filter.Operator == "is" {
-				switch filter.Value {
-				case "null":
-					tx = tx.Where(filter.Field + " IS NULL")
-				case "not null":
-					tx = tx.Where(filter.Field + " IS NOT NULL")
-				}
-			} else {
-				tx = tx.Where(filter.Field+" "+filter.Operator+" ?", keyList)
-			}
-		}
-	}
-	for _, filter := range arrSort {
-		switch filter.Field {
-		case "id", "goal_type", "is_approve", "hex_color", "created_at", "created_by", "created_nik", "updated_at", "updated_nik", "pending_id", "sys_row_status", "tenant_code":
-			switch filter.Value {
-			case "asc", "desc":
-				tx = tx.Order(filter.Field + " " + filter.Value)
-			}
-		}
-	}
-	//tx.Where("deleted_at", nil)
-	return tx
 }
