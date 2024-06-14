@@ -49,3 +49,30 @@ func (p *Paginate) PaginatedResult(value interface{}, db *gorm.DB) func(db *gorm
 		return db.Limit(p.Limit).Offset(offset)
 	}
 }
+
+func (p *Paginate) PaginatedResultJoins(
+	value interface{},
+	db *gorm.DB,
+	joinConditions []string,
+) func(db *gorm.DB) *gorm.DB {
+	var totalRows int64
+
+	for _, joinCondition := range joinConditions {
+		db = db.Joins(joinCondition)
+	}
+
+	db.Model(value).Count(&totalRows)
+	if p.Limit == 0 {
+		p.Limit = int(totalRows)
+	}
+	if p.Page == 0 {
+		p.Page = 1
+	}
+	offset := (p.Page - 1) * p.Limit
+
+	p.TotalRows = int(totalRows)
+	p.TotalPages = int(math.Ceil(float64(totalRows) / float64(p.Limit)))
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Limit(p.Limit).Offset(offset)
+	}
+}
