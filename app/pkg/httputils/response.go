@@ -1,8 +1,8 @@
 package httputils
 
 import (
-	"pkg-library/app/pkg/database"
-	"pkg-library/app/pkg/exception"
+	"github.com/RumbiaID/pkg-library/app/pkg/database"
+	"github.com/RumbiaID/pkg-library/app/pkg/exception"
 )
 
 // ErrorResponse is a struct to represent error http response

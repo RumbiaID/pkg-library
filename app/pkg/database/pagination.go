@@ -1,9 +1,9 @@
 package database
 
 import (
+	"github.com/RumbiaID/pkg-library/app/pkg/getfilter"
 	"gorm.io/gorm"
 	"math"
-	"pkg-library/app/pkg/getfilter"
 )
 
 type Paginate struct {

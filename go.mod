@@ -1,4 +1,4 @@
-module pkg-library
+module github.com/RumbiaID/pkg-library
 
 go 1.22
 

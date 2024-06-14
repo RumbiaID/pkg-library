@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"strings"
 
-	"pkg-library/app/pkg/utils/phonenumber"
-	"pkg-library/app/pkg/utils/pointer"
+	"github.com/RumbiaID/pkg-library/app/pkg/utils/phonenumber"
+	"github.com/RumbiaID/pkg-library/app/pkg/utils/pointer"
 )
 
 // Validator is a struct that contains a pointer to a validator.Validate instance.

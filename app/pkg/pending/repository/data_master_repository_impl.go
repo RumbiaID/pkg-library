@@ -2,8 +2,8 @@ package repository
 
 import (
 	"context"
+	"github.com/RumbiaID/pkg-library/app/pkg/pending/domain"
 	"gorm.io/gorm"
-	"pkg-library/app/pkg/pending/domain"
 )
 
 type PendingRepositoryImpl struct {
