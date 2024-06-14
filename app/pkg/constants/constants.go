@@ -24,6 +24,7 @@ const (
 	DATA_STATUS_PENDING_INSERT   = "Pending Insert"
 	DATA_STATUS_PENDING_UPDATE   = "Pending Update"
 	DATA_STATUS_PENDING_DELETE   = "Pending Delete"
+	DATA_STATUS_PENDING_RETURN   = "Pending Return"
 )
 
 var (
