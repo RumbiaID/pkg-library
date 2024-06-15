@@ -28,6 +28,24 @@ func NewValidator() (*Validator, error) {
 		return field.Tag.Get("name")
 	})
 
+	validate.RegisterValidation("int_list", func(fl validator.FieldLevel) bool {
+		field := fl.Field()
+
+		// Check if the field is of type []int
+		if field.Kind() != reflect.Slice || field.Type().Elem().Kind() != reflect.Int {
+			return false
+		}
+
+		// For example, ensure all elements are positive
+		for i := 0; i < field.Len(); i++ {
+			if field.Index(i).Int() < 0 {
+				return false
+			}
+		}
+
+		return true
+	})
+
 	slog.Info("validator initialized")
 	return &Validator{validate: validate}, nil
 }
