@@ -5,7 +5,10 @@ import (
 	"github.com/go-playground/validator/v10"
 	"log/slog"
 	"reflect"
+	"regexp"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/RumbiaID/pkg-library/app/pkg/utils/phonenumber"
 	"github.com/RumbiaID/pkg-library/app/pkg/utils/pointer"
@@ -44,6 +47,21 @@ func NewValidator() (*Validator, error) {
 		}
 
 		return true
+	})
+
+	validate.RegisterValidation("date_format", func(fl validator.FieldLevel) bool {
+		dateStr := fl.Field().String()
+
+		// Parse Date String
+		_, err := time.Parse("2006-01-02", dateStr)
+		return err == nil
+	})
+
+	validate.RegisterValidation("ratio_value", func(fl validator.FieldLevel) bool {
+		valueFloat := fl.Field().Float()
+		valueStr := strconv.FormatFloat(valueFloat, 'f', -1, 64) // Konversi float64 ke string
+		ratioRegex := regexp.MustCompile(`^[0-9]+(\.[0-9][0-9]?)?$`)
+		return ratioRegex.MatchString(valueStr)
 	})
 
 	slog.Info("validator initialized")
