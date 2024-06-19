@@ -44,6 +44,62 @@ func NewRequestAuditCreate(
 	}
 }
 
+func (model *RequestAuditCreate) DeclareInsertApprove(id string, new interface{}) {
+	model.ActionType = constants.ACTION_TYPE_INSERT
+	model.ApprovalStatus = constants.APPROVAL_STATUS_APPROVE
+	model.Status = constants.AUDIT_STATUS_SUCCESS
+	model.DeclareAuditEndTime()
+	model.DeclareAuditTraceID(id)
+	model.DeclareAuditNewValue(new)
+}
+
+func (model *RequestAuditCreate) DeclareInsertReject(id string, new interface{}) {
+	model.ActionType = constants.ACTION_TYPE_INSERT
+	model.ApprovalStatus = constants.APPROVAL_STATUS_REJECT
+	model.Status = constants.AUDIT_STATUS_SUCCESS
+	model.DeclareAuditEndTime()
+	model.DeclareAuditTraceID(id)
+	model.DeclareAuditNewValue(new)
+}
+
+func (model *RequestAuditCreate) DeclareUpdateApprove(id string, old, new interface{}) {
+	model.ActionType = constants.ACTION_TYPE_UPDATE
+	model.ApprovalStatus = constants.APPROVAL_STATUS_APPROVE
+	model.Status = constants.AUDIT_STATUS_SUCCESS
+	model.DeclareAuditEndTime()
+	model.DeclareAuditTraceID(id)
+	model.DeclareAuditOldValue(old)
+	model.DeclareAuditNewValue(new)
+}
+
+func (model *RequestAuditCreate) DeclareUpdateReject(id string, old, new interface{}) {
+	model.ActionType = constants.ACTION_TYPE_UPDATE
+	model.ApprovalStatus = constants.APPROVAL_STATUS_REJECT
+	model.Status = constants.AUDIT_STATUS_SUCCESS
+	model.DeclareAuditEndTime()
+	model.DeclareAuditTraceID(id)
+	model.DeclareAuditOldValue(old)
+	model.DeclareAuditNewValue(new)
+}
+
+func (model *RequestAuditCreate) DeclareDeleteApprove(id string, old interface{}) {
+	model.ActionType = constants.ACTION_TYPE_DELETE
+	model.ApprovalStatus = constants.APPROVAL_STATUS_APPROVE
+	model.Status = constants.AUDIT_STATUS_SUCCESS
+	model.DeclareAuditEndTime()
+	model.DeclareAuditTraceID(id)
+	model.DeclareAuditOldValue(old)
+}
+
+func (model *RequestAuditCreate) DeclareDeleteReject(id string, old interface{}) {
+	model.ActionType = constants.ACTION_TYPE_DELETE
+	model.ApprovalStatus = constants.APPROVAL_STATUS_REJECT
+	model.Status = constants.AUDIT_STATUS_SUCCESS
+	model.DeclareAuditEndTime()
+	model.DeclareAuditTraceID(id)
+	model.DeclareAuditOldValue(old)
+}
+
 func (model *RequestAuditCreate) DeclareAuditEndTime() {
 	end := time.Now()
 	model.AuditEndTime = &end
