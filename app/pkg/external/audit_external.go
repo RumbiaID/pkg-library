@@ -62,6 +62,16 @@ func (model *RequestAuditCreate) DeclareInsertReject(id string, new interface{})
 	model.DeclareAuditNewValue(new)
 }
 
+func (model *RequestAuditCreate) DeclareInsertRetry(id string, old, new interface{}) {
+	model.ActionType = constants.ACTION_TYPE_INSERT
+	model.ApprovalStatus = constants.APPROVAL_STATUS_RETRY
+	model.Status = constants.AUDIT_STATUS_SUCCESS
+	model.DeclareAuditEndTime()
+	model.DeclareAuditTraceID(id)
+	model.DeclareAuditOldValue(old)
+	model.DeclareAuditNewValue(new)
+}
+
 func (model *RequestAuditCreate) DeclareUpdateApprove(id string, old, new interface{}) {
 	model.ActionType = constants.ACTION_TYPE_UPDATE
 	model.ApprovalStatus = constants.APPROVAL_STATUS_APPROVE
@@ -77,6 +87,15 @@ func (model *RequestAuditCreate) DeclareUpdateReject(id string, old, new interfa
 	model.ApprovalStatus = constants.APPROVAL_STATUS_REJECT
 	model.Status = constants.AUDIT_STATUS_SUCCESS
 	model.DeclareAuditEndTime()
+	model.DeclareAuditTraceID(id)
+	model.DeclareAuditOldValue(old)
+	model.DeclareAuditNewValue(new)
+}
+
+func (model *RequestAuditCreate) DeclareUpdateRetry(id string, old, new interface{}) {
+	model.ActionType = constants.ACTION_TYPE_UPDATE
+	model.ApprovalStatus = constants.APPROVAL_STATUS_RETRY
+	model.Status = constants.AUDIT_STATUS_SUCCESS
 	model.DeclareAuditTraceID(id)
 	model.DeclareAuditOldValue(old)
 	model.DeclareAuditNewValue(new)
@@ -103,12 +122,10 @@ func (model *RequestAuditCreate) DeclareDeleteReject(id string, old interface{})
 func (model *RequestAuditCreate) DeclareAuditEndTime() {
 	end := time.Now()
 	model.AuditEndTime = &end
-
 }
 
 func (model *RequestAuditCreate) DeclareAuditTraceID(id string) {
 	model.TraceID = id
-
 }
 
 func (model *RequestAuditCreate) DeclareAuditNewValue(new interface{}) {
