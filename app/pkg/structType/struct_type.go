@@ -28,19 +28,23 @@ func GetType(dbType string, x interface{}, dst []string) ([]string, []string) {
 					switch fieldType.Kind() {
 					case reflect.String:
 						selected = append(selected, "(new_value->>'"+field+"')::text AS "+field)
+						selected2 = append(selected2, field+"::text")
 					case reflect.Int64:
 						selected = append(selected, "(new_value->>'"+field+"')::int AS "+field)
+						selected2 = append(selected2, field+"::int")
 					default:
 						selected = append(selected, "(new_value->>'"+field+"')::"+fieldType.Name()+" AS "+field)
+						selected2 = append(selected2, field+"::"+fieldType.Name())
 					}
 				} else if dbType == "mysql" {
 					selected = append(selected, "JSON_VALUE(new_value, '$."+field+"') AS "+field)
+					selected2 = append(selected2, field)
 				} else {
 
 					// MYSQL
 					selected = append(selected, "JSON_VALUE(new_value, '$."+field+"') AS "+field)
+					selected2 = append(selected2, field)
 				}
-				selected2 = append(selected2, field)
 				fmt.Println("Field", field, "TYPE ", s.Field(i).Type.Name())
 
 			}
