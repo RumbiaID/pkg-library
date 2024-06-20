@@ -9,7 +9,7 @@ var QueryParserSymbols = []string{
 	"in",
 	"like",
 	"is",
-	"not",
+	"not in",
 }
 
 var QueryParserOperators = map[string]string{
