@@ -103,6 +103,14 @@ func (m *Database) DropColumnDB(dst interface{}, columnTarget string) {
 	slog.Info(fmt.Sprintf("successfully migrated entity: %T", dst))
 }
 
+func (m *Database) RenameColumnDB(dst interface{}, oldname, columnTarget string) {
+	err := m.db.Migrator().RenameColumn(dst, oldname, columnTarget)
+	if err != nil {
+		slog.Error("failed to delete column", "error", err.Error())
+	}
+	slog.Info(fmt.Sprintf("successfully migrated entity: %T", dst))
+}
+
 func (m *Database) DownIndexDB(dst interface{}, columnTarget string) {
 	index, err := m.db.Migrator().GetIndexes(dst)
 	for _, indexData := range index {
