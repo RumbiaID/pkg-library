@@ -107,6 +107,17 @@ func (model *RequestAuditCreate) DeclareUpdateReject(id, remarks string, old, ne
 	model.DeclareAuditNewValue(new)
 }
 
+func (model *RequestAuditCreate) DeclareUpdateReturn(id, remarks string, old, new interface{}) {
+	model.ActionType = constants.ACTION_TYPE_UPDATE
+	model.ApprovalStatus = constants.APPROVAL_STATUS_RETURN
+	model.Status = constants.AUDIT_STATUS_SUCCESS
+	model.ApprovalNotes = remarks
+	model.DeclareAuditEndTime()
+	model.DeclareAuditTraceID(id)
+	model.DeclareAuditOldValue(old)
+	model.DeclareAuditNewValue(new)
+}
+
 func (model *RequestAuditCreate) DeclareUpdateRetry(id string, old, new interface{}) {
 	model.ActionType = constants.ACTION_TYPE_UPDATE
 	model.ApprovalStatus = constants.APPROVAL_STATUS_RETRY
