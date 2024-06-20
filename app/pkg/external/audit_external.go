@@ -27,6 +27,7 @@ type RequestAuditCreate struct {
 	ApprovalStatus int         `validate:"required,eq=0|eq=1|eq=2|eq=3|eq=4" gorm:"size:2" json:"approval_status"`
 	OldValue       interface{} `json:"old_value"`
 	NewValue       interface{} `json:"new_value"`
+	ApprovalNotes  string      `json:"approval_notes"`
 	Status         int         `validate:"required,eq=0|eq=1|eq=2|eq=3" gorm:"size:2" json:"status"`
 	ErrorMessage   string      `gorm:"size:1024" json:"error_message"`
 }
@@ -44,19 +45,31 @@ func NewRequestAuditCreate(
 	}
 }
 
-func (model *RequestAuditCreate) DeclareInsertApprove(id string, new interface{}) {
+func (model *RequestAuditCreate) DeclareInsertApprove(id, remarks string, new interface{}) {
 	model.ActionType = constants.ACTION_TYPE_INSERT
 	model.ApprovalStatus = constants.APPROVAL_STATUS_APPROVE
 	model.Status = constants.AUDIT_STATUS_SUCCESS
+	model.ApprovalNotes = remarks
 	model.DeclareAuditEndTime()
 	model.DeclareAuditTraceID(id)
 	model.DeclareAuditNewValue(new)
 }
 
-func (model *RequestAuditCreate) DeclareInsertReject(id string, new interface{}) {
+func (model *RequestAuditCreate) DeclareInsertReject(id, remarks string, new interface{}) {
 	model.ActionType = constants.ACTION_TYPE_INSERT
 	model.ApprovalStatus = constants.APPROVAL_STATUS_REJECT
 	model.Status = constants.AUDIT_STATUS_SUCCESS
+	model.ApprovalNotes = remarks
+	model.DeclareAuditEndTime()
+	model.DeclareAuditTraceID(id)
+	model.DeclareAuditNewValue(new)
+}
+
+func (model *RequestAuditCreate) DeclareInsertReturn(id, remarks string, new interface{}) {
+	model.ActionType = constants.ACTION_TYPE_INSERT
+	model.ApprovalStatus = constants.APPROVAL_STATUS_RETURN
+	model.Status = constants.AUDIT_STATUS_SUCCESS
+	model.ApprovalNotes = remarks
 	model.DeclareAuditEndTime()
 	model.DeclareAuditTraceID(id)
 	model.DeclareAuditNewValue(new)
@@ -72,20 +85,22 @@ func (model *RequestAuditCreate) DeclareInsertRetry(id string, old, new interfac
 	model.DeclareAuditNewValue(new)
 }
 
-func (model *RequestAuditCreate) DeclareUpdateApprove(id string, old, new interface{}) {
+func (model *RequestAuditCreate) DeclareUpdateApprove(id, remarks string, old, new interface{}) {
 	model.ActionType = constants.ACTION_TYPE_UPDATE
 	model.ApprovalStatus = constants.APPROVAL_STATUS_APPROVE
 	model.Status = constants.AUDIT_STATUS_SUCCESS
+	model.ApprovalNotes = remarks
 	model.DeclareAuditEndTime()
 	model.DeclareAuditTraceID(id)
 	model.DeclareAuditOldValue(old)
 	model.DeclareAuditNewValue(new)
 }
 
-func (model *RequestAuditCreate) DeclareUpdateReject(id string, old, new interface{}) {
+func (model *RequestAuditCreate) DeclareUpdateReject(id, remarks string, old, new interface{}) {
 	model.ActionType = constants.ACTION_TYPE_UPDATE
 	model.ApprovalStatus = constants.APPROVAL_STATUS_REJECT
 	model.Status = constants.AUDIT_STATUS_SUCCESS
+	model.ApprovalNotes = remarks
 	model.DeclareAuditEndTime()
 	model.DeclareAuditTraceID(id)
 	model.DeclareAuditOldValue(old)
@@ -101,19 +116,21 @@ func (model *RequestAuditCreate) DeclareUpdateRetry(id string, old, new interfac
 	model.DeclareAuditNewValue(new)
 }
 
-func (model *RequestAuditCreate) DeclareDeleteApprove(id string, old interface{}) {
+func (model *RequestAuditCreate) DeclareDeleteApprove(id, remarks string, old interface{}) {
 	model.ActionType = constants.ACTION_TYPE_DELETE
 	model.ApprovalStatus = constants.APPROVAL_STATUS_APPROVE
 	model.Status = constants.AUDIT_STATUS_SUCCESS
+	model.ApprovalNotes = remarks
 	model.DeclareAuditEndTime()
 	model.DeclareAuditTraceID(id)
 	model.DeclareAuditOldValue(old)
 }
 
-func (model *RequestAuditCreate) DeclareDeleteReject(id string, old interface{}) {
+func (model *RequestAuditCreate) DeclareDeleteReject(id, remarks string, old interface{}) {
 	model.ActionType = constants.ACTION_TYPE_DELETE
 	model.ApprovalStatus = constants.APPROVAL_STATUS_REJECT
 	model.Status = constants.AUDIT_STATUS_SUCCESS
+	model.ApprovalNotes = remarks
 	model.DeclareAuditEndTime()
 	model.DeclareAuditTraceID(id)
 	model.DeclareAuditOldValue(old)
