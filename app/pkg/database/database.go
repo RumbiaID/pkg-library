@@ -106,7 +106,7 @@ func (m *Database) DropColumnDB(dst interface{}, columnTarget string) {
 func (m *Database) RenameColumnDB(dst interface{}, oldname, columnTarget string) {
 	err := m.db.Migrator().RenameColumn(dst, oldname, columnTarget)
 	if err != nil {
-		slog.Error("failed to delete column", "error", err.Error())
+		slog.Error("failed to rename column", "error", err.Error())
 	}
 	slog.Info(fmt.Sprintf("successfully migrated entity: %T", dst))
 }
