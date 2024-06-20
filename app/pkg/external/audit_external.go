@@ -45,6 +45,20 @@ func NewRequestAuditCreate(
 	}
 }
 
+func (model *RequestAuditCreate) DeclareListView(actionType string) {
+	model.ActionType = actionType
+	model.ApprovalStatus = constants.APPROVAL_STATUS_PENDING
+	model.Status = constants.AUDIT_STATUS_SUCCESS
+	model.DeclareAuditEndTime()
+}
+
+func (model *RequestAuditCreate) DeclareListApproval(actionType string) {
+	model.ActionType = actionType
+	model.ApprovalStatus = constants.APPROVAL_STATUS_APPROVE
+	model.Status = constants.AUDIT_STATUS_SUCCESS
+	model.DeclareAuditEndTime()
+}
+
 func (model *RequestAuditCreate) DeclareInsertApprove(id, remarks string, new interface{}) {
 	model.ActionType = constants.ACTION_TYPE_INSERT
 	model.ApprovalStatus = constants.APPROVAL_STATUS_APPROVE
