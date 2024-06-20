@@ -95,6 +95,14 @@ func (m *Database) MigrateDB(dst ...interface{}) {
 	slog.Info(fmt.Sprintf("successfully migrated entity: %T", dst...))
 }
 
+func (m *Database) DropColumnDB(dst interface{}, columnTarget string) {
+	err := m.db.Migrator().DropColumn(dst, columnTarget)
+	if err != nil {
+		slog.Error("failed to delete column", "error", err.Error())
+	}
+	slog.Info(fmt.Sprintf("successfully migrated entity: %T", dst))
+}
+
 func (m *Database) DownIndexDB(dst interface{}, columnTarget string) {
 	index, err := m.db.Migrator().GetIndexes(dst)
 	for _, indexData := range index {
