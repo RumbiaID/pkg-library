@@ -5,7 +5,7 @@ type Config struct {
 }
 
 type App interface {
-	Run(appconf *Config) error
+	Run() error
 }
 
 type LogMessage struct {
