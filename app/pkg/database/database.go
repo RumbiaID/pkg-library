@@ -165,8 +165,8 @@ func (m *Database) DeleteTable(dst ...interface{}) {
 }
 
 func (m *Database) ListPending(
-	tenantcode, tablename string, value interface{}, db *gorm.DB, columnList ...string,
-) func(db *gorm.DB) *gorm.DB {
+	tenantcode, tablename string, value interface{}, db *gorm.DB, columnList []string,
+) *gorm.DB {
 	// Selected
 	selectSubQuery1, selectSubQuery2 := structType.GetType(db.Config.Dialector.Name(), value, columnList)
 	selectColumn1 := strings.Join(selectSubQuery1, ",")
@@ -184,8 +184,5 @@ func (m *Database) ListPending(
 		Where("tenant_code=?", tenantcode)
 
 	// Combine the subqueries using UNION ALL
-	//unionQuery := db.Table("(?) AS combined", db.Raw("? UNION ALL ?", subQuery1, subQuery2))
-	return func(db *gorm.DB) *gorm.DB {
-		return db.Table("(?) AS combined", db.Raw("? UNION ALL ?", subQuery1, subQuery2))
-	}
+	return db.Table("(?) AS combined", db.Raw("? UNION ALL ?", subQuery1, subQuery2))
 }
