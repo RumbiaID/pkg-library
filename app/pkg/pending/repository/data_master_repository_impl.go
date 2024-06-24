@@ -2,8 +2,11 @@ package repository
 
 import (
 	"context"
+	"github.com/RumbiaID/pkg-library/app/pkg/constants"
 	"github.com/RumbiaID/pkg-library/app/pkg/pending/domain"
+	"github.com/RumbiaID/pkg-library/app/pkg/structType"
 	"gorm.io/gorm"
+	"strings"
 )
 
 type PendingRepositoryImpl struct {
@@ -59,4 +62,27 @@ func (r *PendingRepositoryImpl) GetPending(
 		return nil, err
 	}
 	return models, nil
+}
+
+func ListPending(
+	tenantcode, tablename string, value interface{}, db *gorm.DB, columnList []string,
+) *gorm.DB {
+	// Selected
+	selectSubQuery1, selectSubQuery2 := structType.GetType(db.Config.Dialector.Name(), value, columnList)
+	selectColumn1 := strings.Join(selectSubQuery1, ",")
+	selectColumn2 := strings.Join(selectSubQuery2, ",")
+
+	// Subquery for financial_pending_data
+	subQuery1 := db.Table((&domain.Pending{}).TableName()).
+		Select(selectColumn1).
+		Where("tenant_code=? AND table_name=?", tenantcode, tablename)
+
+	// Subquery for financial_financials
+	subQuery2 := db.Table(tablename).
+		Select(selectColumn2).
+		Where("sys_row_status IN ?", constants.FILTER_PENDING).
+		Where("tenant_code=?", tenantcode)
+
+	// Combine the subqueries using UNION ALL
+	return db.Table("(?) AS combined", db.Raw("? UNION ALL ?", subQuery1, subQuery2))
 }
