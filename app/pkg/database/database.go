@@ -2,10 +2,14 @@ package database
 
 import (
 	"fmt"
+	"github.com/RumbiaID/pkg-library/app/pkg/constants"
+	"github.com/RumbiaID/pkg-library/app/pkg/pending/domain"
+	"github.com/RumbiaID/pkg-library/app/pkg/structType"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm/schema"
 	"log/slog"
 	"os"
+	"strings"
 	"time"
 
 	"gorm.io/driver/mysql"
@@ -95,6 +99,20 @@ func (m *Database) MigrateDB(dst ...interface{}) {
 	slog.Info(fmt.Sprintf("successfully migrated entity: %T", dst...))
 }
 
+func (m *Database) DownMigrate(all bool, dst ...interface{}) {
+	if all {
+		err := m.db.Migrator().DropTable(dst)
+		if err != nil {
+			slog.Error("failed to drop index db", "error", err.Error())
+		}
+	} else if !all {
+		for _, target := range dst {
+			m.WipeTable(target)
+		}
+	}
+	slog.Info(fmt.Sprintf("successfully migrated entity: %T", dst...))
+}
+
 func (m *Database) DropColumnDB(dst interface{}, columnTarget string) {
 	err := m.db.Migrator().DropColumn(dst, columnTarget)
 	if err != nil {
@@ -119,15 +137,55 @@ func (m *Database) DownIndexDB(dst interface{}, columnTarget string) {
 			if columnName == columnTarget {
 				err = m.db.Migrator().DropIndex(dst, indexData.Name())
 				if err = m.db.Migrator().DropConstraint(dst, indexData.Name()); err != nil {
-					logrus.Error("failed to migrate db", "error", err.Error())
-					os.Exit(1)
+					logrus.Error("failed to drop index db", "error", err.Error())
+					//os.Exit(1)
 				}
 			}
 		}
 	}
 	if err != nil {
-		slog.Error("failed to migrate db", "error", err.Error())
-		os.Exit(1)
+		slog.Error("failed to drop index db", "error", err.Error())
+		//os.Exit(1)
 	}
 	slog.Info(fmt.Sprintf("successfully migrated entity: %T", dst))
+}
+
+func (m *Database) WipeTable(dst interface{}) {
+	err := m.db.Where("id is not null").Delete(dst).Error
+	if err != nil {
+		slog.Error("failed to drop index db", "error", err.Error())
+	}
+}
+
+func (m *Database) DeleteTable(dst ...interface{}) {
+	err := m.db.Migrator().DropTable(dst)
+	if err != nil {
+		slog.Error("failed to drop index db", "error", err.Error())
+	}
+}
+
+func (m *Database) ListPending(
+	tenantcode, tablename string, value interface{}, db *gorm.DB, columnList ...string,
+) func(db *gorm.DB) *gorm.DB {
+	// Selected
+	selectSubQuery1, selectSubQuery2 := structType.GetType(db.Config.Dialector.Name(), value, columnList)
+	selectColumn1 := strings.Join(selectSubQuery1, ",")
+	selectColumn2 := strings.Join(selectSubQuery2, ",")
+
+	// Subquery for financial_pending_data
+	subQuery1 := db.Table((&domain.Pending{}).TableName()).
+		Select(selectColumn1).
+		Where("tenant_code=? AND table_name=?", tenantcode, tablename)
+
+	// Subquery for financial_financials
+	subQuery2 := db.Table(tablename).
+		Select(selectColumn2).
+		Where("sys_row_status IN ?", constants.FILTER_PENDING).
+		Where("tenant_code=?", tenantcode)
+
+	// Combine the subqueries using UNION ALL
+	//unionQuery := db.Table("(?) AS combined", db.Raw("? UNION ALL ?", subQuery1, subQuery2))
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Table("(?) AS combined", db.Raw("? UNION ALL ?", subQuery1, subQuery2))
+	}
 }
