@@ -102,11 +102,11 @@ func DeclarePendingUpdate(x interface{}, requestHeader *loggingdata.InsertReturn
 		case "sys_last_pending_by":
 			field.SetString(requestHeader.CreatedBy)
 		case "sys_last_approve_by":
-			field.SetString("")
+			field.SetZero()
 		case "sys_last_approve_host":
-			field.SetString("")
+			field.SetZero()
 		case "sys_last_approval_notes":
-			field.SetString("")
+			field.SetZero()
 		case "sys_last_pending_host":
 			field.SetString(requestHeader.CreatedHost)
 		case "sys_last_pending_time":
@@ -114,9 +114,9 @@ func DeclarePendingUpdate(x interface{}, requestHeader *loggingdata.InsertReturn
 				field.Set(reflect.ValueOf(&now))
 			}
 		case "sys_last_approve_time":
-			if field.Kind() == reflect.Ptr {
-				field.SetZero()
-			}
+
+			field.SetZero()
+
 		case "pending_id":
 			{
 				if field.Kind() == reflect.Ptr {
@@ -149,11 +149,11 @@ func DeclarePendingDelete(x interface{}, requestHeader *loggingdata.InsertReturn
 		case "sys_last_pending_by":
 			field.SetString(requestHeader.CreatedBy)
 		case "sys_last_approve_by":
-			field.SetString("")
+			field.SetZero()
 		case "sys_last_approve_host":
-			field.SetString("")
+			field.SetZero()
 		case "sys_last_approval_notes":
-			field.SetString("")
+			field.SetZero()
 		case "sys_last_pending_host":
 			field.SetString(requestHeader.CreatedHost)
 		case "sys_last_pending_time":
@@ -161,9 +161,77 @@ func DeclarePendingDelete(x interface{}, requestHeader *loggingdata.InsertReturn
 				field.Set(reflect.ValueOf(&now))
 			}
 		case "sys_last_approve_time":
+			field.SetZero()
+
+		case "pending_id":
+			field.SetZero()
+		}
+	}
+}
+
+func DeclareApproveUpsert(x interface{}, requestHeader *loggingdata.InsertReturn, remarks string) {
+	body := reflect.ValueOf(x).Elem()
+	bodyType := reflect.TypeOf(x).Elem()
+	now := time.Now()
+
+	for i := 0; i < body.NumField(); i++ {
+		field := body.Field(i)
+		fieldType := bodyType.Field(i)
+
+		switch fieldType.Tag.Get("json") {
+		case "sys_row_status":
+			field.SetInt(constants.SYSROW_STATUS_ACTIVE) // Replace with appropriate constant
+		case "sys_last_approve_by":
+			field.SetString(requestHeader.CreatedBy)
+		case "sys_last_approve_host":
+			field.SetString(requestHeader.CreatedHost)
+		case "sys_last_approval_notes":
+			field.SetString(remarks)
+		case "sys_last_pending_time":
 			if field.Kind() == reflect.Ptr {
 				field.SetZero()
 			}
+		case "sys_last_approve_time":
+			if field.Kind() == reflect.Ptr {
+				field.Set(reflect.ValueOf(&now))
+			}
+		case "pending_id":
+			field.SetZero()
+		}
+
+	}
+}
+
+func DeclareReturnInsert(x interface{}, requestHeader *loggingdata.InsertReturn, remarks string) {
+	body := reflect.ValueOf(x).Elem()
+	bodyType := reflect.TypeOf(x).Elem()
+
+	for i := 0; i < body.NumField(); i++ {
+		field := body.Field(i)
+		fieldType := bodyType.Field(i)
+
+		switch fieldType.Tag.Get("json") {
+		case "sys_row_status":
+			field.SetInt(constants.SYSROW_STATUS_RETURN_INSERT) // Replace with appropriate constant
+		case "sys_last_approval_notes":
+			field.SetString(remarks)
+		}
+	}
+}
+
+func DeclareReturnUpdate(x interface{}, requestHeader *loggingdata.InsertReturn, remarks string) {
+	body := reflect.ValueOf(x).Elem()
+	bodyType := reflect.TypeOf(x).Elem()
+
+	for i := 0; i < body.NumField(); i++ {
+		field := body.Field(i)
+		fieldType := bodyType.Field(i)
+
+		switch fieldType.Tag.Get("json") {
+		case "sys_row_status", "row_status":
+			field.SetInt(constants.SYSROW_STATUS_RETURN_UPDATE) // Replace with appropriate constant
+		case "sys_last_approval_notes", "return_notes":
+			field.SetString(remarks)
 		}
 	}
 }
