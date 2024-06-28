@@ -99,12 +99,6 @@ func DeclarePendingUpdate(x interface{}, requestHeader *loggingdata.InsertReturn
 		switch fieldType.Tag.Get("json") {
 		case "sys_row_status":
 			field.SetInt(constants.SYSROW_STATUS_PENDING_UPDATE) // Replace with appropriate constant
-		case "sys_created_by":
-			field.SetString(requestHeader.CreatedBy)
-		case "sys_created_time":
-			field.Set(reflect.ValueOf(now))
-		case "sys_created_host":
-			field.SetString(requestHeader.CreatedHost)
 		case "sys_last_pending_by":
 			field.SetString(requestHeader.CreatedBy)
 		case "sys_last_approve_by":
