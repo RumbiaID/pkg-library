@@ -2,7 +2,10 @@ package structType
 
 import (
 	"fmt"
+	"github.com/RumbiaID/pkg-library/app/pkg/constants"
+	"github.com/RumbiaID/pkg-library/app/pkg/loggingdata"
 	"reflect"
+	"time"
 )
 
 // RETURN 1 for json where, RETURN 2 for column
@@ -52,4 +55,121 @@ func GetType(dbType string, x interface{}, dst []string) ([]string, []string) {
 	}
 
 	return selected, selected2
+}
+
+func DeclarePendingInsert(x interface{}, requestHeader *loggingdata.InsertReturn) {
+	body := reflect.ValueOf(x).Elem()
+	bodyType := reflect.TypeOf(x).Elem()
+	now := time.Now()
+
+	for i := 0; i < body.NumField(); i++ {
+		field := body.Field(i)
+		fieldType := bodyType.Field(i)
+
+		switch fieldType.Tag.Get("json") {
+		case "sys_row_status":
+			field.SetInt(constants.SYSROW_STATUS_PENDING_INSERT) // Replace with appropriate constant
+		case "sys_created_by":
+			field.SetString(requestHeader.CreatedBy)
+		case "sys_created_time":
+			field.Set(reflect.ValueOf(now))
+		case "sys_created_host":
+			field.SetString(requestHeader.CreatedHost)
+		case "sys_last_pending_by":
+			field.SetString(requestHeader.CreatedBy)
+		case "sys_last_pending_host":
+			field.SetString(requestHeader.CreatedHost)
+		case "sys_last_pending_time":
+			if field.Kind() == reflect.Ptr {
+				field.Set(reflect.ValueOf(&now))
+			}
+		}
+	}
+}
+
+func DeclarePendingUpdate(x interface{}, requestHeader *loggingdata.InsertReturn, pendingId *int) {
+	body := reflect.ValueOf(x).Elem()
+	bodyType := reflect.TypeOf(x).Elem()
+	now := time.Now()
+
+	for i := 0; i < body.NumField(); i++ {
+		field := body.Field(i)
+		fieldType := bodyType.Field(i)
+
+		switch fieldType.Tag.Get("json") {
+		case "sys_row_status":
+			field.SetInt(constants.SYSROW_STATUS_PENDING_UPDATE) // Replace with appropriate constant
+		case "sys_created_by":
+			field.SetString(requestHeader.CreatedBy)
+		case "sys_created_time":
+			field.Set(reflect.ValueOf(now))
+		case "sys_created_host":
+			field.SetString(requestHeader.CreatedHost)
+		case "sys_last_pending_by":
+			field.SetString(requestHeader.CreatedBy)
+		case "sys_last_approve_by":
+			field.SetString("")
+		case "sys_last_approve_host":
+			field.SetString("")
+		case "sys_last_approval_notes":
+			field.SetString("")
+		case "sys_last_pending_host":
+			field.SetString(requestHeader.CreatedHost)
+		case "sys_last_pending_time":
+			if field.Kind() == reflect.Ptr {
+				field.Set(reflect.ValueOf(&now))
+			}
+		case "sys_last_approve_time":
+			if field.Kind() == reflect.Ptr {
+				field.SetZero()
+			}
+		case "pending_id":
+			{
+				if field.Kind() == reflect.Ptr {
+					switch field.Type().Elem().Kind() {
+					case reflect.Int:
+						value := *pendingId
+						field.Set(reflect.ValueOf(&value))
+					case reflect.Int64:
+						value := int64(*pendingId)
+						field.Set(reflect.ValueOf(&value))
+					}
+				}
+			}
+		}
+	}
+}
+
+func DeclarePendingDelete(x interface{}, requestHeader *loggingdata.InsertReturn) {
+	body := reflect.ValueOf(x).Elem()
+	bodyType := reflect.TypeOf(x).Elem()
+	now := time.Now()
+
+	for i := 0; i < body.NumField(); i++ {
+		field := body.Field(i)
+		fieldType := bodyType.Field(i)
+
+		switch fieldType.Tag.Get("json") {
+		case "sys_row_status":
+			field.SetInt(constants.SYSROW_STATUS_PENDING_DELETE) // Replace with appropriate constant
+		case "sys_last_pending_by":
+			field.SetString(requestHeader.CreatedBy)
+		case "sys_last_approve_by":
+			field.SetString("")
+		case "sys_last_approve_host":
+			field.SetString("")
+		case "sys_last_approval_notes":
+			field.SetString("")
+		case "sys_last_pending_host":
+			field.SetString(requestHeader.CreatedHost)
+		case "sys_last_pending_time":
+			if field.Kind() == reflect.Ptr {
+				field.Set(reflect.ValueOf(&now))
+			}
+		case "sys_last_approve_time":
+			if field.Kind() == reflect.Ptr {
+				field.SetZero()
+			}
+		}
+	}
 }

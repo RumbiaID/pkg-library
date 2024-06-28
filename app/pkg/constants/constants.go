@@ -35,4 +35,8 @@ var (
 	FILTER_PENDING         = []int{SYSROW_STATUS_PENDING_INSERT, SYSROW_STATUS_PENDING_DELETE}
 	TYPE_INCOME_EXPENSE    = []string{"Income", "Expense"}
 	TYPE_ASSET_LIABILITIES = []string{"Asset", "Liability"}
+	PENDING_INSERT_FIELD   = []string{
+		"sys_row_status", "sys_created_by", "sys_created_time", "sys_created_host", "sys_last_pending_by",
+		"sys_last_pending_host",
+	}
 )
