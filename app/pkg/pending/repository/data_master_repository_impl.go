@@ -32,7 +32,7 @@ func (r *PendingRepositoryImpl) UpdatePending(ctx context.Context, tx *gorm.DB, 
 	query := tx.WithContext(ctx)
 	if err := query.
 		Model(&domain.Pending{ID: model.ID}).
-		Select("new_value").
+		Select("new_value", "row_status", "return_notes").
 		Updates(model).
 		Error; err != nil {
 		return err
