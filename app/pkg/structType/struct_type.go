@@ -71,8 +71,6 @@ func DeclarePendingInsert(x interface{}, requestHeader *loggingdata.InsertReturn
 			field.SetInt(constants.SYSROW_STATUS_PENDING_INSERT) // Replace with appropriate constant
 		case "sys_created_by":
 			field.SetString(requestHeader.CreatedBy)
-		case "sys_created_time":
-			field.Set(reflect.ValueOf(now))
 		case "sys_created_host":
 			field.SetString(requestHeader.CreatedHost)
 		case "sys_last_pending_by":
@@ -250,18 +248,14 @@ func DeclareRejectDelUp(x interface{}, requestHeader *loggingdata.InsertReturn, 
 			field.SetInt(constants.SYSROW_STATUS_ACTIVE) // Replace with appropriate constant
 		case "sys_last_approve_by":
 			field.SetString(requestHeader.CreatedBy)
-		case "sys_last_approve_host":
-			field.SetString(requestHeader.CreatedHost)
-		case "sys_last_approval_notes":
-			field.SetString(remarks)
-		case "sys_last_pending_time":
-			if field.Kind() == reflect.Ptr {
-				field.SetZero()
-			}
 		case "sys_last_approve_time":
 			if field.Kind() == reflect.Ptr {
 				field.Set(reflect.ValueOf(&now))
 			}
+		case "sys_last_approve_host":
+			field.SetString(requestHeader.CreatedHost)
+		case "sys_last_approval_notes":
+			field.SetString(remarks)
 		case "pending_id":
 			field.SetZero()
 		}
@@ -269,7 +263,7 @@ func DeclareRejectDelUp(x interface{}, requestHeader *loggingdata.InsertReturn, 
 	}
 }
 
-func DeclareRetryInsert(x interface{}, requestHeader *loggingdata.InsertReturn, remarks string) {
+func DeclareRetryInsert(x interface{}, requestHeader *loggingdata.InsertReturn) {
 	body := reflect.ValueOf(x).Elem()
 	bodyType := reflect.TypeOf(x).Elem()
 	now := time.Now()
@@ -281,40 +275,18 @@ func DeclareRetryInsert(x interface{}, requestHeader *loggingdata.InsertReturn, 
 		switch fieldType.Tag.Get("json") {
 		case "sys_row_status":
 			field.SetInt(constants.SYSROW_STATUS_PENDING_INSERT) // Replace with appropriate constant
+		case "sys_created_by":
+			field.SetString(requestHeader.CreatedBy)
+		case "sys_created_host":
+			field.SetString(requestHeader.CreatedHost)
 		case "sys_last_pending_by":
 			field.SetString(requestHeader.CreatedBy)
 		case "sys_last_pending_time":
-			field.Set(reflect.ValueOf(now))
-		case "sys_last_approve_time":
-			field.SetZero()
+			if field.Kind() == reflect.Ptr {
+				field.Set(reflect.ValueOf(&now))
+			}
 		case "sys_last_pending_host":
 			field.SetString(requestHeader.CreatedHost)
-		}
-	}
-}
-
-func DeclareRetryUpdate(x interface{}, requestHeader *loggingdata.InsertReturn, remarks string) {
-	body := reflect.ValueOf(x).Elem()
-	bodyType := reflect.TypeOf(x).Elem()
-	now := time.Now()
-
-	for i := 0; i < body.NumField(); i++ {
-		field := body.Field(i)
-		fieldType := bodyType.Field(i)
-
-		switch fieldType.Tag.Get("json") {
-		case "sys_row_status":
-			field.SetInt(constants.SYSROW_STATUS_PENDING_UPDATE) // Replace with appropriate constant
-		case "sys_last_pending_by":
-			field.SetString(requestHeader.CreatedBy)
-		case "sys_last_pending_host":
-			field.SetString(requestHeader.CreatedHost)
-		case "sys_last_pending_time":
-			field.Set(reflect.ValueOf(now))
-		case "sys_last_approve_time":
-			field.SetZero()
-		case "sys_last_approve_by", "sys_last_approve_host", "sys_last_approval_notes":
-			field.SetZero()
 		}
 	}
 }
