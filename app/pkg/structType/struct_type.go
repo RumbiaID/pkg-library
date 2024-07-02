@@ -301,10 +301,10 @@ func DeclareReturnUpdate(x interface{}, requestHeader *loggingdata.InsertReturn,
 
 		switch jsonTag {
 		case "sys_row_status", "row_status":
-			fieldsFound[jsonTag] = true
+			fieldsFound["sys_row_status"] = true
 			field.SetInt(constants.SYSROW_STATUS_RETURN_UPDATE) // Replace with appropriate constant
 		case "sys_last_approval_notes", "return_notes":
-			fieldsFound[jsonTag] = true
+			fieldsFound["sys_last_approval_notes"] = true
 			field.SetString(remarks)
 		}
 
