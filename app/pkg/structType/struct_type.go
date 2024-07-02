@@ -1,6 +1,7 @@
 package structType
 
 import (
+	"errors"
 	"fmt"
 	"github.com/RumbiaID/pkg-library/app/pkg/constants"
 	"github.com/RumbiaID/pkg-library/app/pkg/loggingdata"
@@ -57,236 +58,346 @@ func GetType(dbType string, x interface{}, dst []string) ([]string, []string) {
 	return selected, selected2
 }
 
-func DeclarePendingInsert(x interface{}, requestHeader *loggingdata.InsertReturn) {
+func DeclarePendingInsert(x interface{}, requestHeader *loggingdata.InsertReturn) error {
 	body := reflect.ValueOf(x).Elem()
 	bodyType := reflect.TypeOf(x).Elem()
 	now := time.Now()
-
+	fieldsFound := make(map[string]bool)
+	for _, field := range constants.PENDING_INSERT_FIELD {
+		fieldsFound[field] = false
+	}
 	for i := 0; i < body.NumField(); i++ {
 		field := body.Field(i)
 		fieldType := bodyType.Field(i)
+		jsonTag := fieldType.Tag.Get("json")
 
-		switch fieldType.Tag.Get("json") {
-		case "sys_row_status":
-			field.SetInt(constants.SYSROW_STATUS_PENDING_INSERT) // Replace with appropriate constant
-		case "sys_created_by":
-			field.SetString(requestHeader.CreatedBy)
-		case "sys_created_host":
-			field.SetString(requestHeader.CreatedHost)
-		case "sys_last_pending_by":
-			field.SetString(requestHeader.CreatedBy)
-		case "sys_last_pending_host":
-			field.SetString(requestHeader.CreatedHost)
-		case "sys_last_pending_time":
-			if field.Kind() == reflect.Ptr {
-				field.Set(reflect.ValueOf(&now))
+		if _, exists := fieldsFound[jsonTag]; exists {
+			fieldsFound[jsonTag] = true
+			switch jsonTag {
+			case "sys_row_status":
+				field.SetInt(constants.SYSROW_STATUS_PENDING_INSERT) // Replace with appropriate constant
+			case "sys_created_by":
+				field.SetString(requestHeader.CreatedBy)
+			case "sys_created_host":
+				field.SetString(requestHeader.CreatedHost)
+			case "sys_last_pending_by":
+				field.SetString(requestHeader.CreatedBy)
+			case "sys_last_pending_host":
+				field.SetString(requestHeader.CreatedHost)
+			case "sys_last_pending_time":
+				if field.Kind() == reflect.Ptr {
+					field.Set(reflect.ValueOf(&now))
+				}
 			}
 		}
 	}
+	// Check if all required fields are found
+	for field, found := range fieldsFound {
+		if !found {
+			return errors.New("missing field: " + field)
+		}
+	}
+	return nil
 }
 
-func DeclarePendingUpdate(x interface{}, requestHeader *loggingdata.InsertReturn, pendingId *int) {
+func DeclarePendingUpdate(x interface{}, requestHeader *loggingdata.InsertReturn, pendingId *int) error {
 	body := reflect.ValueOf(x).Elem()
 	bodyType := reflect.TypeOf(x).Elem()
 	now := time.Now()
-
+	fieldsFound := make(map[string]bool)
+	for _, field := range constants.PENDING_UPDATE_FIELD {
+		fieldsFound[field] = false
+	}
 	for i := 0; i < body.NumField(); i++ {
 		field := body.Field(i)
 		fieldType := bodyType.Field(i)
+		jsonTag := fieldType.Tag.Get("json")
 
-		switch fieldType.Tag.Get("json") {
-		case "sys_row_status":
-			field.SetInt(constants.SYSROW_STATUS_PENDING_UPDATE) // Replace with appropriate constant
-		case "sys_last_pending_by":
-			field.SetString(requestHeader.CreatedBy)
-		case "sys_last_approve_by":
-			field.SetZero()
-		case "sys_last_approve_host":
-			field.SetZero()
-		case "sys_last_approval_notes":
-			field.SetZero()
-		case "sys_last_pending_host":
-			field.SetString(requestHeader.CreatedHost)
-		case "sys_last_pending_time":
-			if field.Kind() == reflect.Ptr {
-				field.Set(reflect.ValueOf(&now))
-			}
-		case "sys_last_approve_time":
-
-			field.SetZero()
-
-		case "pending_id":
-			{
+		if _, exists := fieldsFound[jsonTag]; exists {
+			fieldsFound[jsonTag] = true
+			switch jsonTag {
+			case "sys_row_status":
+				field.SetInt(constants.SYSROW_STATUS_PENDING_UPDATE) // Replace with appropriate constant
+			case "sys_last_pending_by":
+				field.SetString(requestHeader.CreatedBy)
+			case "sys_last_approve_by":
+				field.SetZero()
+			case "sys_last_approve_host":
+				field.SetZero()
+			case "sys_last_approval_notes":
+				field.SetZero()
+			case "sys_last_pending_host":
+				field.SetString(requestHeader.CreatedHost)
+			case "sys_last_pending_time":
 				if field.Kind() == reflect.Ptr {
-					switch field.Type().Elem().Kind() {
-					case reflect.Int:
-						value := *pendingId
-						field.Set(reflect.ValueOf(&value))
-					case reflect.Int64:
-						value := int64(*pendingId)
-						field.Set(reflect.ValueOf(&value))
+					field.Set(reflect.ValueOf(&now))
+				}
+			case "sys_last_approve_time":
+
+				field.SetZero()
+
+			case "pending_id":
+				{
+					if field.Kind() == reflect.Ptr {
+						switch field.Type().Elem().Kind() {
+						case reflect.Int:
+							value := *pendingId
+							field.Set(reflect.ValueOf(&value))
+						case reflect.Int64:
+							value := int64(*pendingId)
+							field.Set(reflect.ValueOf(&value))
+						}
 					}
 				}
 			}
 		}
 	}
-}
-
-func DeclarePendingDelete(x interface{}, requestHeader *loggingdata.InsertReturn) {
-	body := reflect.ValueOf(x).Elem()
-	bodyType := reflect.TypeOf(x).Elem()
-	now := time.Now()
-
-	for i := 0; i < body.NumField(); i++ {
-		field := body.Field(i)
-		fieldType := bodyType.Field(i)
-
-		switch fieldType.Tag.Get("json") {
-		case "sys_row_status":
-			field.SetInt(constants.SYSROW_STATUS_PENDING_DELETE) // Replace with appropriate constant
-		case "sys_last_pending_by":
-			field.SetString(requestHeader.CreatedBy)
-		case "sys_last_approve_by":
-			field.SetZero()
-		case "sys_last_approve_host":
-			field.SetZero()
-		case "sys_last_approval_notes":
-			field.SetZero()
-		case "sys_last_pending_host":
-			field.SetString(requestHeader.CreatedHost)
-		case "sys_last_pending_time":
-			if field.Kind() == reflect.Ptr {
-				field.Set(reflect.ValueOf(&now))
-			}
-		case "sys_last_approve_time":
-			field.SetZero()
-
-		case "pending_id":
-			field.SetZero()
+	// Check if all required fields are found
+	for field, found := range fieldsFound {
+		if !found {
+			return errors.New("missing field: " + field)
 		}
 	}
+	return nil
 }
 
-func DeclareApproveUpsert(x interface{}, requestHeader *loggingdata.InsertReturn, remarks string) {
+func DeclarePendingDelete(x interface{}, requestHeader *loggingdata.InsertReturn) error {
 	body := reflect.ValueOf(x).Elem()
 	bodyType := reflect.TypeOf(x).Elem()
 	now := time.Now()
-
+	fieldsFound := make(map[string]bool)
+	for _, field := range constants.PENDING_DELETE_FIELD {
+		fieldsFound[field] = false
+	}
 	for i := 0; i < body.NumField(); i++ {
 		field := body.Field(i)
 		fieldType := bodyType.Field(i)
+		jsonTag := fieldType.Tag.Get("json")
 
-		switch fieldType.Tag.Get("json") {
-		case "sys_row_status":
-			field.SetInt(constants.SYSROW_STATUS_ACTIVE) // Replace with appropriate constant
-		case "sys_last_approve_by":
-			field.SetString(requestHeader.CreatedBy)
-		case "sys_last_approve_host":
-			field.SetString(requestHeader.CreatedHost)
-		case "sys_last_approval_notes":
-			field.SetString(remarks)
-		case "sys_last_pending_time":
-			if field.Kind() == reflect.Ptr {
+		if _, exists := fieldsFound[jsonTag]; exists {
+			fieldsFound[jsonTag] = true
+			switch jsonTag {
+			case "sys_row_status":
+				field.SetInt(constants.SYSROW_STATUS_PENDING_DELETE) // Replace with appropriate constant
+			case "sys_last_pending_by":
+				field.SetString(requestHeader.CreatedBy)
+			case "sys_last_approve_by":
+				field.SetZero()
+			case "sys_last_approve_host":
+				field.SetZero()
+			case "sys_last_approval_notes":
+				field.SetZero()
+			case "sys_last_pending_host":
+				field.SetString(requestHeader.CreatedHost)
+			case "sys_last_pending_time":
+				if field.Kind() == reflect.Ptr {
+					field.Set(reflect.ValueOf(&now))
+				}
+			case "sys_last_approve_time":
+				field.SetZero()
+
+			case "pending_id":
 				field.SetZero()
 			}
-		case "sys_last_approve_time":
-			if field.Kind() == reflect.Ptr {
-				field.Set(reflect.ValueOf(&now))
-			}
-		case "pending_id":
-			field.SetZero()
-		}
-
-	}
-}
-
-func DeclareReturnInsert(x interface{}, requestHeader *loggingdata.InsertReturn, remarks string) {
-	body := reflect.ValueOf(x).Elem()
-	bodyType := reflect.TypeOf(x).Elem()
-
-	for i := 0; i < body.NumField(); i++ {
-		field := body.Field(i)
-		fieldType := bodyType.Field(i)
-
-		switch fieldType.Tag.Get("json") {
-		case "sys_row_status":
-			field.SetInt(constants.SYSROW_STATUS_RETURN_INSERT) // Replace with appropriate constant
-		case "sys_last_approval_notes":
-			field.SetString(remarks)
 		}
 	}
-}
-
-func DeclareReturnUpdate(x interface{}, requestHeader *loggingdata.InsertReturn, remarks string) {
-	body := reflect.ValueOf(x).Elem()
-	bodyType := reflect.TypeOf(x).Elem()
-
-	for i := 0; i < body.NumField(); i++ {
-		field := body.Field(i)
-		fieldType := bodyType.Field(i)
-
-		switch fieldType.Tag.Get("json") {
-		case "sys_row_status", "row_status":
-			field.SetInt(constants.SYSROW_STATUS_RETURN_UPDATE) // Replace with appropriate constant
-		case "sys_last_approval_notes", "return_notes":
-			field.SetString(remarks)
+	// Check if all required fields are found
+	for field, found := range fieldsFound {
+		if !found {
+			return errors.New("missing field: " + field)
 		}
 	}
+	return nil
 }
 
-func DeclareRejectDelUp(x interface{}, requestHeader *loggingdata.InsertReturn, remarks string) {
+func DeclareApproveUpsert(x interface{}, requestHeader *loggingdata.InsertReturn, remarks string) error {
 	body := reflect.ValueOf(x).Elem()
 	bodyType := reflect.TypeOf(x).Elem()
 	now := time.Now()
-
+	fieldsFound := make(map[string]bool)
+	for _, field := range constants.APPROVE_UPSERT_FIELD {
+		fieldsFound[field] = false
+	}
 	for i := 0; i < body.NumField(); i++ {
 		field := body.Field(i)
 		fieldType := bodyType.Field(i)
+		jsonTag := fieldType.Tag.Get("json")
 
-		switch fieldType.Tag.Get("json") {
-		case "sys_row_status":
-			field.SetInt(constants.SYSROW_STATUS_ACTIVE) // Replace with appropriate constant
-		case "sys_last_approve_by":
-			field.SetString(requestHeader.CreatedBy)
-		case "sys_last_approve_time":
-			if field.Kind() == reflect.Ptr {
-				field.Set(reflect.ValueOf(&now))
+		if _, exists := fieldsFound[jsonTag]; exists {
+			fieldsFound[jsonTag] = true
+			switch jsonTag {
+			case "sys_row_status":
+				field.SetInt(constants.SYSROW_STATUS_ACTIVE) // Replace with appropriate constant
+			case "sys_last_approve_by":
+				field.SetString(requestHeader.CreatedBy)
+			case "sys_last_approve_host":
+				field.SetString(requestHeader.CreatedHost)
+			case "sys_last_approval_notes":
+				field.SetString(remarks)
+			case "sys_last_pending_time":
+				if field.Kind() == reflect.Ptr {
+					field.SetZero()
+				}
+			case "sys_last_approve_time":
+				if field.Kind() == reflect.Ptr {
+					field.Set(reflect.ValueOf(&now))
+				}
+			case "pending_id":
+				field.SetZero()
 			}
-		case "sys_last_approve_host":
-			field.SetString(requestHeader.CreatedHost)
-		case "sys_last_approval_notes":
-			field.SetString(remarks)
-		case "pending_id":
-			field.SetZero()
 		}
-
 	}
+	// Check if all required fields are found
+	for field, found := range fieldsFound {
+		if !found {
+			return errors.New("missing field: " + field)
+		}
+	}
+	return nil
 }
 
-func DeclareRetryInsert(x interface{}, requestHeader *loggingdata.InsertReturn) {
+func DeclareReturnInsert(x interface{}, requestHeader *loggingdata.InsertReturn, remarks string) error {
+	body := reflect.ValueOf(x).Elem()
+	bodyType := reflect.TypeOf(x).Elem()
+	fieldsFound := make(map[string]bool)
+	for _, field := range constants.RETURN_UPSERT_FIELD {
+		fieldsFound[field] = false
+	}
+	for i := 0; i < body.NumField(); i++ {
+		field := body.Field(i)
+		fieldType := bodyType.Field(i)
+		jsonTag := fieldType.Tag.Get("json")
+
+		if _, exists := fieldsFound[jsonTag]; exists {
+			fieldsFound[jsonTag] = true
+			switch jsonTag {
+			case "sys_row_status":
+				field.SetInt(constants.SYSROW_STATUS_RETURN_INSERT) // Replace with appropriate constant
+			case "sys_last_approval_notes":
+				field.SetString(remarks)
+			}
+		}
+	}
+	// Check if all required fields are found
+	for field, found := range fieldsFound {
+		if !found {
+			return errors.New("missing field: " + field)
+		}
+	}
+	return nil
+}
+
+func DeclareReturnUpdate(x interface{}, requestHeader *loggingdata.InsertReturn, remarks string) error {
+	body := reflect.ValueOf(x).Elem()
+	bodyType := reflect.TypeOf(x).Elem()
+	fieldsFound := make(map[string]bool)
+	for _, field := range constants.RETURN_UPSERT_FIELD {
+		fieldsFound[field] = false
+	}
+	for i := 0; i < body.NumField(); i++ {
+		field := body.Field(i)
+		fieldType := bodyType.Field(i)
+		jsonTag := fieldType.Tag.Get("json")
+
+		if _, exists := fieldsFound[jsonTag]; exists {
+			fieldsFound[jsonTag] = true
+			switch jsonTag {
+			case "sys_row_status", "row_status":
+				field.SetInt(constants.SYSROW_STATUS_RETURN_UPDATE) // Replace with appropriate constant
+			case "sys_last_approval_notes", "return_notes":
+				field.SetString(remarks)
+			}
+		}
+	}
+	// Check if all required fields are found
+	for field, found := range fieldsFound {
+		if !found {
+			return errors.New("missing field: " + field)
+		}
+	}
+	return nil
+}
+
+func DeclareRejectDelUp(x interface{}, requestHeader *loggingdata.InsertReturn, remarks string) error {
 	body := reflect.ValueOf(x).Elem()
 	bodyType := reflect.TypeOf(x).Elem()
 	now := time.Now()
-
+	fieldsFound := make(map[string]bool)
+	for _, field := range constants.REJECT_DELUP_FIELD {
+		fieldsFound[field] = false
+	}
 	for i := 0; i < body.NumField(); i++ {
 		field := body.Field(i)
 		fieldType := bodyType.Field(i)
+		jsonTag := fieldType.Tag.Get("json")
 
-		switch fieldType.Tag.Get("json") {
-		case "sys_row_status":
-			field.SetInt(constants.SYSROW_STATUS_PENDING_INSERT) // Replace with appropriate constant
-		case "sys_created_by":
-			field.SetString(requestHeader.CreatedBy)
-		case "sys_created_host":
-			field.SetString(requestHeader.CreatedHost)
-		case "sys_last_pending_by":
-			field.SetString(requestHeader.CreatedBy)
-		case "sys_last_pending_time":
-			if field.Kind() == reflect.Ptr {
-				field.Set(reflect.ValueOf(&now))
+		if _, exists := fieldsFound[jsonTag]; exists {
+			fieldsFound[jsonTag] = true
+			switch jsonTag {
+			case "sys_row_status":
+				field.SetInt(constants.SYSROW_STATUS_ACTIVE) // Replace with appropriate constant
+			case "sys_last_approve_by":
+				field.SetString(requestHeader.CreatedBy)
+			case "sys_last_approve_time":
+				if field.Kind() == reflect.Ptr {
+					field.Set(reflect.ValueOf(&now))
+				}
+			case "sys_last_approve_host":
+				field.SetString(requestHeader.CreatedHost)
+			case "sys_last_approval_notes":
+				field.SetString(remarks)
+			case "pending_id":
+				field.SetZero()
 			}
-		case "sys_last_pending_host":
-			field.SetString(requestHeader.CreatedHost)
 		}
 	}
+	// Check if all required fields are found
+	for field, found := range fieldsFound {
+		if !found {
+			return errors.New("missing field: " + field)
+		}
+	}
+	return nil
+}
+
+func DeclareRetryInsert(x interface{}, requestHeader *loggingdata.InsertReturn) error {
+	body := reflect.ValueOf(x).Elem()
+	bodyType := reflect.TypeOf(x).Elem()
+	now := time.Now()
+	fieldsFound := make(map[string]bool)
+	for _, field := range constants.RETRY_INSERT_FIELD {
+		fieldsFound[field] = false
+	}
+	for i := 0; i < body.NumField(); i++ {
+		field := body.Field(i)
+		fieldType := bodyType.Field(i)
+		jsonTag := fieldType.Tag.Get("json")
+
+		if _, exists := fieldsFound[jsonTag]; exists {
+			fieldsFound[jsonTag] = true
+			switch jsonTag {
+			case "sys_row_status":
+				field.SetInt(constants.SYSROW_STATUS_PENDING_INSERT) // Replace with appropriate constant
+			case "sys_created_by":
+				field.SetString(requestHeader.CreatedBy)
+			case "sys_created_host":
+				field.SetString(requestHeader.CreatedHost)
+			case "sys_last_pending_by":
+				field.SetString(requestHeader.CreatedBy)
+			case "sys_last_pending_time":
+				if field.Kind() == reflect.Ptr {
+					field.Set(reflect.ValueOf(&now))
+				}
+			case "sys_last_pending_host":
+				field.SetString(requestHeader.CreatedHost)
+			}
+		}
+	}
+	// Check if all required fields are found
+	for field, found := range fieldsFound {
+		if !found {
+			return errors.New("missing field: " + field)
+		}
+	}
+	return nil
 }

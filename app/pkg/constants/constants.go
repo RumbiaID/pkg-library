@@ -36,7 +36,33 @@ var (
 	TYPE_INCOME_EXPENSE    = []string{"Income", "Expense"}
 	TYPE_ASSET_LIABILITIES = []string{"Asset", "Liability"}
 	PENDING_INSERT_FIELD   = []string{
-		"sys_row_status", "sys_created_by", "sys_created_time", "sys_created_host", "sys_last_pending_by",
-		"sys_last_pending_host",
+		"sys_row_status", "sys_created_by", "sys_created_host", "sys_last_pending_by",
+		"sys_last_pending_host", "sys_last_pending_time",
+	}
+	PENDING_UPDATE_FIELD = []string{
+		"sys_row_status", "sys_last_pending_by", "sys_last_approve_by",
+		"sys_last_approve_host", "sys_last_approval_notes", "sys_last_pending_host",
+		"sys_last_pending_time", "sys_last_approve_time", "pending_id",
+	}
+	PENDING_DELETE_FIELD = []string{
+		"sys_row_status", "sys_last_pending_by", "sys_last_approve_by",
+		"sys_last_approve_host", "sys_last_approval_notes", "sys_last_pending_host",
+		"sys_last_pending_time", "sys_last_approve_time", "pending_id",
+	}
+	APPROVE_UPSERT_FIELD = []string{
+		"sys_row_status", "sys_last_approve_by", "sys_last_approve_host",
+		"sys_last_approval_notes", "sys_last_pending_time", "sys_last_approve_time",
+		"pending_id",
+	}
+	RETURN_UPSERT_FIELD = []string{
+		"sys_row_status", "sys_last_approval_notes",
+	}
+	REJECT_DELUP_FIELD = []string{
+		"sys_row_status", "sys_last_approve_by", "sys_last_approve_time",
+		"sys_last_approve_host", "sys_last_approval_notes", "pending_id",
+	}
+	RETRY_INSERT_FIELD = []string{
+		"sys_row_status", "sys_created_by", "sys_created_host",
+		"sys_last_pending_by", "sys_last_pending_time", "sys_last_pending_host",
 	}
 )
