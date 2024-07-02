@@ -299,15 +299,15 @@ func DeclareReturnUpdate(x interface{}, requestHeader *loggingdata.InsertReturn,
 		fieldType := bodyType.Field(i)
 		jsonTag := fieldType.Tag.Get("json")
 
-		if _, exists := fieldsFound[jsonTag]; exists {
+		switch jsonTag {
+		case "sys_row_status", "row_status":
 			fieldsFound[jsonTag] = true
-			switch jsonTag {
-			case "sys_row_status", "row_status":
-				field.SetInt(constants.SYSROW_STATUS_RETURN_UPDATE) // Replace with appropriate constant
-			case "sys_last_approval_notes", "return_notes":
-				field.SetString(remarks)
-			}
+			field.SetInt(constants.SYSROW_STATUS_RETURN_UPDATE) // Replace with appropriate constant
+		case "sys_last_approval_notes", "return_notes":
+			fieldsFound[jsonTag] = true
+			field.SetString(remarks)
 		}
+
 	}
 	// Check if all required fields are found
 	for field, found := range fieldsFound {
