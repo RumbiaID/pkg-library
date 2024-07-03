@@ -33,8 +33,11 @@ func GetType(dbType string, x interface{}, dst []string) ([]string, []string) {
 					case reflect.String:
 						selected = append(selected, "(new_value->>'"+field+"')::text AS "+field)
 						selected2 = append(selected2, field+"::text")
-					case reflect.Int64:
+					case reflect.Int:
 						selected = append(selected, "(new_value->>'"+field+"')::int AS "+field)
+						selected2 = append(selected2, field+"::int")
+					case reflect.Int64:
+						selected = append(selected, "(new_value->>'"+field+"')::bigint AS "+field)
 						selected2 = append(selected2, field+"::int")
 					default:
 						selected = append(selected, "(new_value->>'"+field+"')::"+fieldType.Name()+" AS "+field)
