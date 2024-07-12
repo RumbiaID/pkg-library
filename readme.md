@@ -28,7 +28,8 @@ How to Use CQRS
     }
     `````
    2.2 Driver you can use: "postgres" / "pgsql", "mysql", "sqlserver", "oracle".
-   2.3  isCqrs you may fill with a Boolean value of false or true.
+   
+   2.3 isCqrs you may fill with a Boolean value of false or true.
 
 This declaration of the Database will return a struct consisting of:
 ```
