@@ -34,7 +34,7 @@ func (d *Database) GetDB() *gorm.DB {
 	return d.db
 }
 
-func NewDatabase(driver string, cfg *Config, isCqrs bool) *Database {
+func NewDatabase(driver string, cfg *Config) *Database {
 	var db *gorm.DB
 	var err error
 	var dialect gorm.Dialector
@@ -85,7 +85,7 @@ func NewDatabase(driver string, cfg *Config, isCqrs bool) *Database {
 	sqlDB.SetConnMaxIdleTime(30 * time.Minute)
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
-	return &Database{db: db, isCqrs: isCqrs}
+	return &Database{db: db, isCqrs: false}
 }
 
 func (m *Database) CqrsDB(driver string, cfg *Config) {
@@ -118,7 +118,8 @@ func (m *Database) CqrsDB(driver string, cfg *Config) {
 		slog.Error("failed to configure connection pool READ", "error", errResolver.Error())
 		os.Exit(1)
 	}
-
+	//change isCqrs status
+	m.isCqrs = true
 }
 
 func (m *Database) MigrateDB(dst ...interface{}) {

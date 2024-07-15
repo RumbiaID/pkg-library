@@ -14,7 +14,7 @@ How to Use CQRS
 
 1. In the main package you are using, make sure you import "github.com/RumbiaID/pkg-library/app/pkg/database".
 
-2. During the declaration of using the database, you would run a function from the database folder called NewDatabase(driver string, cfg *Config, isCqrs bool)
+2. During the declaration of using the database, you would run a function from the database folder called NewDatabase(driver string, cfg *Config)
 
    2.1 Config of db consists of:
     ````
@@ -28,8 +28,6 @@ How to Use CQRS
     }
     `````
    2.2 Driver you can use: "postgres" / "pgsql", "mysql", "sqlserver", "oracle".
-   
-   2.3 isCqrs you may fill with a Boolean value of false or true.
 
 This declaration of the Database will return a struct consisting of:
 ```
@@ -39,7 +37,7 @@ type Database struct {
 }
 ```
 
-3. If you input the isCqrs as true, you may use CqrsDB(driver string, cfg *Config) to insert the replica value.
+3. If you want to enable CQRS, you may use CqrsDB(driver string, cfg *Config) to insert the replica value.
 
 4. For migrating purposes, you would use methods from the Database struct:
 ````
