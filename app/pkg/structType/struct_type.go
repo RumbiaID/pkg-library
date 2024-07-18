@@ -2,7 +2,6 @@ package structType
 
 import (
 	"errors"
-	"fmt"
 	"github.com/RumbiaID/pkg-library/app/pkg/constants"
 	"github.com/RumbiaID/pkg-library/app/pkg/loggingdata"
 	"reflect"
@@ -52,8 +51,6 @@ func GetType(dbType string, x interface{}, dst []string) ([]string, []string) {
 					selected = append(selected, "JSON_VALUE(new_value, '$."+field+"') AS "+field)
 					selected2 = append(selected2, field)
 				}
-				fmt.Println("Field", field, "TYPE ", s.Field(i).Type.Name())
-
 			}
 		}
 	}
