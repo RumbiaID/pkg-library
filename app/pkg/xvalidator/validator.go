@@ -3,6 +3,7 @@ package xvalidator
 import (
 	"fmt"
 	"github.com/go-playground/validator/v10"
+	"github.com/nyaruka/phonenumbers"
 	"log/slog"
 	"reflect"
 	"regexp"
@@ -63,7 +64,40 @@ func NewValidator() (*Validator, error) {
 		ratioRegex := regexp.MustCompile(`^[0-9]+(\.[0-9][0-9]?)?$`)
 		return ratioRegex.MatchString(valueStr)
 	})
+	validate.RegisterValidation("phone", func(fl validator.FieldLevel) bool {
+		phoneNumber := fl.Field().String()
 
+		phoneString, err := phonenumbers.Parse(phoneNumber, "MY")
+		if err != nil {
+			return false
+		}
+		return phonenumbers.IsValidNumber(phoneString)
+	})
+
+	validate.RegisterValidation("email_if_type", func(fl validator.FieldLevel) bool {
+		typeField := fl.Parent().FieldByName("Type").String()
+		emailField := fl.Field().String()
+		if typeField == "email" {
+			if err := validator.New().Var(emailField, "email"); err != nil {
+				return false
+			}
+		}
+		return true
+	})
+
+	validate.RegisterValidation("phone_if_type", func(fl validator.FieldLevel) bool {
+		typeField := fl.Parent().FieldByName("Type").String()
+		phoneNumber := fl.Field().String()
+
+		if typeField == "phone_number" {
+			phoneString, err := phonenumbers.Parse(phoneNumber, "MY")
+			if err != nil {
+				return false
+			}
+			return phonenumbers.IsValidNumber(phoneString)
+		}
+		return true
+	})
 	slog.Info("validator initialized")
 	return &Validator{validate: validate}, nil
 }
@@ -145,6 +179,8 @@ func (v *Validator) formatValidationError(err error) map[string]string {
 			errors[err.Field()] = fmt.Sprintf("%s must be numeric", err.Field())
 		case "number":
 			errors[err.Field()] = fmt.Sprintf("%s must be a number", err.Field())
+		case "phone":
+			errors[err.Field()] = fmt.Sprintf("%s invalid phone number", err.Field())
 		default:
 			errors[err.Field()] = fmt.Sprintf("%s is not valid", err.Field())
 		}
