@@ -6,7 +6,6 @@ import (
 	"errors"
 	"github.com/gabriel-vasile/mimetype"
 	"io"
-	"log/slog"
 	"os"
 )
 
@@ -36,11 +35,32 @@ func ValidateImage(base64String string, maxsize int64) (string, error) {
 	return mimeType.Extension(), nil
 }
 
+func UploadFile64(filePath string, filename string, base64String string) error {
+	// Decode base64 string into a byte slice
+	data, err := base64.StdEncoding.DecodeString(base64String)
+	if err != nil {
+		return err
+	}
+
+	// Create the file with the specified path
+	dst, err := os.Create(filePath + filename)
+	if err != nil {
+		return err
+	}
+	defer dst.Close()
+
+	// Write the decoded data to the file
+	if _, err := dst.Write(data); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func LoadImage64(filePath string, filename string) (string, error) {
 	// Open file on disk.
 	file, err := os.Open(filePath + filename)
 	if err != nil {
-		slog.Error(err.Error())
 		return "", err
 	}
 	defer file.Close()
@@ -49,7 +69,6 @@ func LoadImage64(filePath string, filename string) (string, error) {
 	reader := bufio.NewReader(file)
 	content, err := io.ReadAll(reader)
 	if err != nil {
-		slog.Error(err.Error())
 		return "", err
 	}
 
