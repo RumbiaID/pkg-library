@@ -23,6 +23,33 @@ type Exception struct {
 	Error   error
 }
 
+func (e *Exception) GetError() *string {
+	if e.Error != nil {
+		err := e.Error.Error()
+		return &err
+	}
+	return nil
+}
+
+func (e *Exception) GetHttpCode() int {
+	switch e.Code {
+	case InvalidArgumentCode:
+		return 400
+	case NotFoundCode:
+		return 404
+	case AlreadyExistsCode:
+		return 409
+	case PermissionDeniedCode:
+		return 403
+	case UnauthenticatedCode:
+		return 401
+	case InternalErrorCode:
+		return 500
+	default:
+		return 500
+	}
+}
+
 // InvalidArgument creates a new Exception with the InvalidArgumentCode error code.
 func InvalidArgument(message any) *Exception {
 	return &Exception{
