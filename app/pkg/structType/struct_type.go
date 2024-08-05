@@ -58,7 +58,7 @@ func GetType(dbType string, x interface{}, dst []string) ([]string, []string) {
 	return selected, selected2
 }
 
-func DeclarePendingInsert(x interface{}, requestHeader *loggingdata.InsertReturn) error {
+func DeclarePendingInsert(x interface{}, requestHeader *loggingdata.RequestHeader) error {
 	body := reflect.ValueOf(x).Elem()
 	bodyType := reflect.TypeOf(x).Elem()
 	now := time.Now()
@@ -100,7 +100,7 @@ func DeclarePendingInsert(x interface{}, requestHeader *loggingdata.InsertReturn
 	return nil
 }
 
-func DeclarePendingUpdate(x interface{}, requestHeader *loggingdata.InsertReturn, pendingId *int) error {
+func DeclarePendingUpdate(x interface{}, requestHeader *loggingdata.RequestHeader, pendingId *int) error {
 	body := reflect.ValueOf(x).Elem()
 	bodyType := reflect.TypeOf(x).Elem()
 	now := time.Now()
@@ -161,7 +161,7 @@ func DeclarePendingUpdate(x interface{}, requestHeader *loggingdata.InsertReturn
 	return nil
 }
 
-func DeclarePendingDelete(x interface{}, requestHeader *loggingdata.InsertReturn) error {
+func DeclarePendingDelete(x interface{}, requestHeader *loggingdata.RequestHeader) error {
 	body := reflect.ValueOf(x).Elem()
 	bodyType := reflect.TypeOf(x).Elem()
 	now := time.Now()
@@ -210,7 +210,7 @@ func DeclarePendingDelete(x interface{}, requestHeader *loggingdata.InsertReturn
 	return nil
 }
 
-func DeclareApproveUpsert(x interface{}, requestHeader *loggingdata.InsertReturn, remarks string) error {
+func DeclareApproveUpsert(x interface{}, requestHeader *loggingdata.RequestHeader, remarks string) error {
 	body := reflect.ValueOf(x).Elem()
 	bodyType := reflect.TypeOf(x).Elem()
 	now := time.Now()
@@ -256,7 +256,7 @@ func DeclareApproveUpsert(x interface{}, requestHeader *loggingdata.InsertReturn
 	return nil
 }
 
-func DeclareReturnInsert(x interface{}, requestHeader *loggingdata.InsertReturn, remarks string) error {
+func DeclareReturnInsert(x interface{}, requestHeader *loggingdata.RequestHeader, remarks string) error {
 	body := reflect.ValueOf(x).Elem()
 	bodyType := reflect.TypeOf(x).Elem()
 	fieldsFound := make(map[string]bool)
@@ -287,7 +287,7 @@ func DeclareReturnInsert(x interface{}, requestHeader *loggingdata.InsertReturn,
 	return nil
 }
 
-func DeclareReturnUpdate(x interface{}, requestHeader *loggingdata.InsertReturn, remarks string) error {
+func DeclareReturnUpdate(x interface{}, requestHeader *loggingdata.RequestHeader, remarks string) error {
 	body := reflect.ValueOf(x).Elem()
 	bodyType := reflect.TypeOf(x).Elem()
 	fieldsFound := make(map[string]bool)
@@ -318,7 +318,7 @@ func DeclareReturnUpdate(x interface{}, requestHeader *loggingdata.InsertReturn,
 	return nil
 }
 
-func DeclareRejectDelUp(x interface{}, requestHeader *loggingdata.InsertReturn, remarks string) error {
+func DeclareRejectDelUp(x interface{}, requestHeader *loggingdata.RequestHeader, remarks string) error {
 	body := reflect.ValueOf(x).Elem()
 	bodyType := reflect.TypeOf(x).Elem()
 	now := time.Now()
@@ -360,7 +360,7 @@ func DeclareRejectDelUp(x interface{}, requestHeader *loggingdata.InsertReturn, 
 	return nil
 }
 
-func DeclareRetryInsert(x interface{}, requestHeader *loggingdata.InsertReturn) error {
+func DeclareRetryInsert(x interface{}, requestHeader *loggingdata.RequestHeader) error {
 	body := reflect.ValueOf(x).Elem()
 	bodyType := reflect.TypeOf(x).Elem()
 	now := time.Now()

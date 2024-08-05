@@ -1,13 +1,7 @@
 package loggingdata
 
-type InsertReturn struct {
+type RequestHeader struct {
 	CreatedBy   string
 	CreatedHost string
-	TenantCode  string
-}
-
-type UpdateReturn struct {
-	UpdatedBy   string
-	UpdatedHost string
 	TenantCode  string
 }
