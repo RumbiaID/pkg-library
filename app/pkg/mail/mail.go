@@ -2,7 +2,6 @@ package mail
 
 import (
 	"github.com/RumbiaID/pkg-library/app/pkg/filevalidation"
-	smtp2 "github.com/cmarkh/smtp"
 	"github.com/sirupsen/logrus"
 	"github.com/wneessen/go-mail"
 	"io"
@@ -39,37 +38,6 @@ func NewMailClient(config *Config) *mail.Client {
 		}
 		return client
 	}
-	return nil
-}
-
-func NewMailV2(config *Config, subject, body, attachmentURL string, email, cc []string) error {
-	sending := smtp2.NewEMail(`{"port":0}`)
-	sending.From = config.Configsendername
-	sending.Host = config.Configsmtphost
-	sending.Port = config.Configsmtpport // [587 NTLM AUTH] [465，994]
-	sending.Username = config.Configauthemail
-	sending.Password = config.Configauthpassword
-	sending.HTML = body
-	sending.Auth = smtp2.NTLMAuth(sending.Host, sending.Username, sending.Password, smtp2.NTLMVersion1)
-	sending.To = email
-	sending.Subject = subject
-	//sending.AttachFile(reportFile)
-	var sendError error
-	for retry := 0; retry < 3; retry++ {
-		sendError = sending.Send()
-		if sendError == nil {
-			// Email sent successfully, break the loop
-			break
-		}
-		// Sleep for a moment before retrying (you can adjust the sleep duration)
-		time.Sleep(2 * time.Second)
-	}
-
-	if sendError != nil {
-		// Return an error if all retries fail
-		return sendError
-	}
-	logrus.Print("Mail Sent to: ", email)
 	return nil
 }
 
