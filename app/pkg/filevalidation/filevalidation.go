@@ -30,7 +30,7 @@ func ValidateImage(base64String string, maxsize int64) (string, error) {
 	mimeType := mimetype.Detect(data)
 
 	// Extension or mimeType checker, if not .png/.jpeg/.webp/.bmp return error
-	if mimeType.String() != "image/png" && mimeType.String() != "image/jpeg" && mimeType.String() != "image/vnd.mozilla.apng" && mimeType.String() != "image/webp" && mimeType.String() != "image/bmp" {
+	if mimeType.String() != "image/png" && mimeType.String() != "image/jpeg" && mimeType.String() != "image/vnd.mozilla.apng" && mimeType.String() != "image/webp" && mimeType.String() != "image/bmp" && mimeType.String() != "image/x-icon" {
 		return "", errors.New("extension invalid: " + mimeType.String())
 	}
 
