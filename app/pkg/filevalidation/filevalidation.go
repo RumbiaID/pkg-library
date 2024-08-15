@@ -141,3 +141,11 @@ func ValidateFile(filePath string) (string, error) {
 
 	return mimeType.Extension(), nil
 }
+
+func CreatorFolder(filepath string) error {
+	err := os.MkdirAll(filepath, 0755)
+	if err != nil {
+		return err
+	}
+	return nil
+}
