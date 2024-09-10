@@ -7,11 +7,11 @@ type QueryField struct {
 	Value    string
 }
 
-func ArrQuery(queryString string) map[string]QueryField {
+func ArrQuery(queryString string) map[string][]QueryField {
 	regex := regexp.MustCompile(`(\w+):([^|]+):(\w+)`)
 	matches := regex.FindAllStringSubmatch(queryString, -1)
 
-	arrQuery := make(map[string]QueryField)
+	arrQuery := make(map[string][]QueryField)
 
 	for _, match := range matches {
 		field := match[1]
@@ -23,9 +23,18 @@ func ArrQuery(queryString string) map[string]QueryField {
 			symbol = operator
 		}
 
-		arrQuery[field] = QueryField{
+		queryField := QueryField{
 			Operator: symbol,
 			Value:    value,
+		}
+
+		// Check if the field already exists in the map
+		if _, found := arrQuery[field]; found {
+			// If found, append the new QueryField to the existing slice
+			arrQuery[field] = append(arrQuery[field], queryField)
+		} else {
+			// If not found, create a new slice with the current QueryField
+			arrQuery[field] = []QueryField{queryField}
 		}
 	}
 

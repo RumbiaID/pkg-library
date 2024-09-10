@@ -28,11 +28,13 @@ func Initiate(c *gin.Context) *FilterMiddleware {
 	if exists {
 		filterItems := make([]FilterItem, 0)
 		for field, q := range ArrQuery(filter) {
-			filterItems = append(filterItems, FilterItem{
-				Field:    field,
-				Operator: q.Operator,
-				Value:    q.Value,
-			})
+			for _, queryField := range q {
+				filterItems = append(filterItems, FilterItem{
+					Field:    field,
+					Operator: queryField.Operator,
+					Value:    queryField.Value,
+				})
+			}
 		}
 		filtermiddleware.ArrQuery = filterItems
 	}
