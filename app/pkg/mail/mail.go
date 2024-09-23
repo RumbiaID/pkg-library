@@ -2,9 +2,9 @@ package mail
 
 import (
 	"github.com/RumbiaID/pkg-library/app/pkg/filevalidation"
-	"github.com/sirupsen/logrus"
 	"github.com/wneessen/go-mail"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"os"
@@ -19,46 +19,55 @@ type Config struct {
 	Configsendername   string `validate:"required" name:"CONFIG_SENDER_NAME"`
 	Configauthemail    string `validate:"required" name:"CONFIG_AUTH_EMAIL"`
 	Configauthpassword string `validate:"required" name:"CONFIG_AUTH_PASSWORD"`
+	Configsmtpssl      bool   `validate:"boolean" name:"CONFIG_SMTP_SSL"`
 }
 
 func NewMailClient(config *Config) *mail.Client {
 	mailService := config.Configsmtpservice
+	var client *mail.Client
+	var err error
 	if mailService == "gmail" {
-		client, err := mail.NewClient(config.Configsmtphost, mail.WithPort(config.Configsmtpport), mail.WithSMTPAuth(mail.SMTPAuthPlain),
+		client, err = mail.NewClient(config.Configsmtphost, mail.WithPort(config.Configsmtpport), mail.WithSMTPAuth(mail.SMTPAuthPlain),
 			mail.WithUsername(config.Configauthemail), mail.WithPassword(config.Configauthpassword))
 		if err != nil {
-			logrus.Printf("failed to create mail client: %s", err)
+			slog.Error("failed to create mail client: %s", err)
+			return nil
 		}
-		return client
 	} else if mailService == "outlook" {
-		client, err := mail.NewClient(config.Configsmtphost, mail.WithPort(config.Configsmtpport), mail.WithSMTPAuth(mail.SMTPAuthLogin),
+		client, err = mail.NewClient(config.Configsmtphost, mail.WithPort(config.Configsmtpport), mail.WithSMTPAuth(mail.SMTPAuthLogin),
 			mail.WithUsername(config.Configauthemail), mail.WithPassword(config.Configauthpassword))
 		if err != nil {
-			logrus.Printf("failed to create mail client: %s", err)
+			slog.Error("failed to create mail client: %s", err)
+			return nil
 		}
-		return client
+	} else {
+		slog.Error("mail service not supported")
+		return nil
 	}
-	return nil
+	if config.Configsmtpssl {
+		client.SetSSL(true)
+	}
+	return client
 }
 
 func NewMail(client *mail.Client, email, subject, body, attachmentURL, sender string, cc []string) error {
 
 	m := mail.NewMsg()
 	if err := m.From(sender); err != nil {
-		logrus.Printf("failed to set From address: %s", err)
+		slog.Error("failed to set From address", slog.Any("error", err))
 	}
 	if strings.Contains(email, ",") {
 		emailArray := strings.Split(email, ",")
 		if err := m.To(emailArray...); err != nil {
-			logrus.Printf("failed to set To address: %s", err)
+			slog.Error("failed to set To address", slog.Any("error", err))
 		}
 	} else {
 		if err := m.To(email); err != nil {
-			logrus.Printf("failed to set To address: %s", err)
+			slog.Error("failed to set To address", slog.Any("error", err))
 		}
 	}
 	if err := m.Cc(cc...); err != nil {
-		logrus.Printf("failed to set To address: %s", err)
+		slog.Error("failed to set To address", slog.Any("error", err))
 	}
 	m.Subject(subject)
 	m.SetBodyString(mail.TypeTextHTML, body)
@@ -108,7 +117,7 @@ func NewMail(client *mail.Client, email, subject, body, attachmentURL, sender st
 		} else if filecheck == "file" {
 			file, err := os.Open(attachmentURL)
 			if err != nil {
-				logrus.Fatal(err)
+				slog.Any("error", err)
 			}
 			defer file.Close()
 			extension, err := filevalidation.ValidateImageReader(file)
@@ -133,7 +142,7 @@ func NewMail(client *mail.Client, email, subject, body, attachmentURL, sender st
 		// Return an error if all retries fail
 		return sendError
 	}
-	logrus.Print("Mail Sent to: ", email)
+	slog.Error("Mail Sent to: " + email)
 	defer os.Remove(pathFile)
 	return nil
 }
