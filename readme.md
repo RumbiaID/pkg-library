@@ -96,6 +96,17 @@ type Example struct {
   SysLastApproveHost   string                 `gorm:"column:sys_last_approve_host" json:"sys_last_approve_host"`
 }
 ```
+## How to Get TenantCode
+- **RequestHeader**: [](./app/pkg/loggingdata)
+```go
+func (h ExampleHandler) CreateExample(ctx *gin.Context) {
+	    var RequestHeader *loggingdata.RequestHeader
+	    RequestHeader = loggingdata.GetRequestHeader(ctx)
+        tenantCode := RequestHeader.TenantCode
+	//example Handler using gin
+}
+```
+
 
 ---
 
