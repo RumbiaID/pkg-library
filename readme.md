@@ -371,7 +371,7 @@ func (s *ExampleServiceImpl) UpdateExample(
 		}
 	}
 
-	if err := s.exampleRepo.UpdateExample(ctx, tx, body); err != nil {
+	if err := s.exampleRepo.UpdateExample(ctx, tx, detailExample); err != nil {
 		return exception.Internal("error updating example", err)
 	}
 
