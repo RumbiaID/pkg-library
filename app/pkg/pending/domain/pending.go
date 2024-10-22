@@ -19,7 +19,7 @@ type Pending struct {
 	ActionType  string          `validate:"required,eq=I|eq=U|eq=D" gorm:"size:1" json:"action_type"`
 	RowStatus   int             `json:"row_status"`
 	ReturnNotes string          `json:"return_notes"`
-	NewValue    json.RawMessage `gorm:"type:json" json:"new_value,omitempty"`
+	NewValue    json.RawMessage `gorm:"type:text;serializer:json" json:"new_value,omitempty"`
 	PendingBy   string          `gorm:"size:100" json:"pending_by"`
 	PendingTime *time.Time      `gorm:"autoCreateTime" json:"pending_time"`
 	PendingHost string          `gorm:"size:256" json:"pending_host"`
