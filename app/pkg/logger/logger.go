@@ -13,18 +13,10 @@ type Config struct {
 }
 
 func SetupLogger(config *Config) {
-	var logger *slog.Logger
-	err := os.MkdirAll(config.LogPath, 0755)
-	if err != nil {
-		panic(err)
-	}
-	file, err := os.OpenFile(config.LogPath+"/app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-	if err != nil {
-		panic(err)
-	}
-	//defer file.Close()
-
+	var writer io.Writer
 	var logLevel slog.Level
+
+	// Determine log level
 	if config.AppENV == "production" {
 		logLevel = slog.LevelWarn
 	} else {
@@ -34,16 +26,41 @@ func SetupLogger(config *Config) {
 			logLevel = slog.LevelInfo
 		}
 	}
-	logJSONHandler := slog.NewJSONHandler(io.MultiWriter(os.Stdout, file), &slog.HandlerOptions{
+
+	if config.LogPath == "" {
+		// If no log path is specified, log only to stdout
+		writer = os.Stdout
+	} else {
+		// Ensure log directory exists
+		err := os.MkdirAll(config.LogPath, 0755)
+		if err != nil {
+			panic(err)
+		}
+
+		// Open log file
+		file, err := os.OpenFile(config.LogPath+"/app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+		if err != nil {
+			panic(err)
+		}
+
+		// Write to both stdout and file
+		writer = io.MultiWriter(os.Stdout, file)
+	}
+
+	logJSONHandler := slog.NewJSONHandler(writer, &slog.HandlerOptions{
 		AddSource: true,
 		Level:     logLevel,
 	})
-	logger = slog.New(logJSONHandler)
+	logger := slog.New(logJSONHandler)
 	slog.SetDefault(logger)
 
-	if config.AppENV == "production" {
-		slog.Info("log to file")
+	if config.LogPath == "" {
+		slog.Info("logging only to stdout because LogPath is empty")
 	} else {
-		slog.Info("by default log to stdout, set environment APP_ENV=production to log to file")
+		if config.AppENV == "production" {
+			slog.Info("logging to file and stdout")
+		} else {
+			slog.Info("logging to stdout and file (non-production mode)")
+		}
 	}
 }
