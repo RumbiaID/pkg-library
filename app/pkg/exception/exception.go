@@ -12,6 +12,7 @@ const (
 	UnauthenticatedCode     Code = "UNAUTHENTICATED"      // Represents an unauthenticated error.
 	InternalErrorCode       Code = "INTERNAL"             // Represents an internal error.
 	UnprocessableEntityCode Code = "UNPROCESSABLE_ENTITY" // Represents an unprocessable entity error.
+	BadRequestCode          Code = "BAD_REQUEST"          // Represents an internal error.
 )
 
 // Exception is a struct to represent exception/error from service.
@@ -97,6 +98,14 @@ func Unauthenticated(message any) *Exception {
 func UnprocessableEntity(message any) *Exception {
 	return &Exception{
 		Code:    UnprocessableEntityCode,
+		Message: message,
+	}
+}
+
+// BadRequest creates a new Exception with the BadRequestCode error code.
+func BadRequest(message any) *Exception {
+	return &Exception{
+		Code:    BadRequestCode,
 		Message: message,
 	}
 }
