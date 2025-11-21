@@ -46,6 +46,8 @@ func GenErrorResponseException(exc *exception.Exception) *ErrorResponse {
 		return GenErrorResponse(401, exc.Message, exc.Error)
 	case exception.InternalErrorCode:
 		return GenErrorResponse(500, exc.Message, exc.Error)
+	case exception.UnprocessableEntityCode:
+		return GenErrorResponse(422, exc.Message, exc.Error)
 	default:
 		return GenErrorResponse(500, exc.Message, exc.Error)
 	}
