@@ -95,10 +95,11 @@ func Unauthenticated(message any) *Exception {
 }
 
 // UnprocessableEntity creates a new Exception with the UnprocessableEntityCode error code.
-func UnprocessableEntity(message any) *Exception {
+func UnprocessableEntity(message any, err error) *Exception {
 	return &Exception{
 		Code:    UnprocessableEntityCode,
 		Message: message,
+		Error:   err,
 	}
 }
 
