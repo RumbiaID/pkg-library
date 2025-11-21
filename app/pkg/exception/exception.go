@@ -5,12 +5,13 @@ type Code string
 
 // Predefined error codes.
 const (
-	InvalidArgumentCode  Code = "INVALID_ARGUMENT"  // Represents an invalid argument error.
-	NotFoundCode         Code = "NOT_FOUND"         // Represents a not found error.
-	AlreadyExistsCode    Code = "ALREADY_EXISTS"    // Represents an already exists error.
-	PermissionDeniedCode Code = "PERMISSION_DENIED" // Represents a permission denied error.
-	UnauthenticatedCode  Code = "UNAUTHENTICATED"   // Represents an unauthenticated error.
-	InternalErrorCode    Code = "INTERNAL"          // Represents an internal error.
+	InvalidArgumentCode     Code = "INVALID_ARGUMENT"     // Represents an invalid argument error.
+	NotFoundCode            Code = "NOT_FOUND"            // Represents a not found error.
+	AlreadyExistsCode       Code = "ALREADY_EXISTS"       // Represents an already exists error.
+	PermissionDeniedCode    Code = "PERMISSION_DENIED"    // Represents a permission denied error.
+	UnauthenticatedCode     Code = "UNAUTHENTICATED"      // Represents an unauthenticated error.
+	InternalErrorCode       Code = "INTERNAL"             // Represents an internal error.
+	UnprocessableEntityCode Code = "UNPROCESSABLE_ENTITY" // Represents an unprocessable entity error.
 )
 
 // Exception is a struct to represent exception/error from service.
@@ -43,6 +44,8 @@ func (e *Exception) GetHttpCode() int {
 		return 403
 	case UnauthenticatedCode:
 		return 401
+	case UnprocessableEntityCode:
+		return 422
 	case InternalErrorCode:
 		return 500
 	default:
@@ -86,6 +89,14 @@ func PermissionDenied(message any) *Exception {
 func Unauthenticated(message any) *Exception {
 	return &Exception{
 		Code:    UnauthenticatedCode,
+		Message: message,
+	}
+}
+
+// UnprocessableEntity creates a new Exception with the UnprocessableEntityCode error code.
+func UnprocessableEntity(message any) *Exception {
+	return &Exception{
+		Code:    UnprocessableEntityCode,
 		Message: message,
 	}
 }
